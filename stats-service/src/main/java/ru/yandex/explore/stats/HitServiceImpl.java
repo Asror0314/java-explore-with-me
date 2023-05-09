@@ -15,6 +15,7 @@ public class HitServiceImpl implements HitService {
 
     @Autowired
     private HitRepository repository;
+
     @Override
     public HitDto addNewHit(HitDto hitDto) {
         final Hit savedHit = repository.save(HitMapper.mapHit(hitDto));
