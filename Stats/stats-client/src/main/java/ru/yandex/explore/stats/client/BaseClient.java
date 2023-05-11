@@ -19,10 +19,6 @@ public class BaseClient {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
-    protected ResponseEntity<Object> post(String path) {
-        return makeAndSendRequest(HttpMethod.POST, path, null, null);
-    }
-
     protected <T> ResponseEntity<Object> post(String path, T body) {
         return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
@@ -31,7 +27,7 @@ public class BaseClient {
             HttpMethod method,
             String path,
             @Nullable Map<String, Object> parameters,
-            T body) {
+            @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body);
 
         ResponseEntity<Object> statsServerResponse;
