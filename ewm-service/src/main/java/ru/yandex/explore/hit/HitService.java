@@ -1,4 +1,4 @@
-package ru.yandex.explore.stats.hit;
+package ru.yandex.explore.hit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

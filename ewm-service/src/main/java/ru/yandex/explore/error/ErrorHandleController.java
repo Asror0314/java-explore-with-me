@@ -1,4 +1,4 @@
-package ru.yandex.explore.stats.error;
+package ru.yandex.explore.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
