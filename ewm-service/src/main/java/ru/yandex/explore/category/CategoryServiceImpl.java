@@ -6,8 +6,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.explore.category.dto.CategoryDto;
 import ru.yandex.explore.exception.NotFoundException;
-
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
