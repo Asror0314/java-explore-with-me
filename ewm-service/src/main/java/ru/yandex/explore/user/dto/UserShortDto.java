@@ -1,12 +1,13 @@
-package ru.yandex.explore.category.dto;
+package ru.yandex.explore.user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryDto {
+public class UserShortDto {
     private Long id;
 
     private String name;
+
 }

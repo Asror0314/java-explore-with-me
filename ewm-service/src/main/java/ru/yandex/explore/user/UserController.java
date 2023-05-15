@@ -2,10 +2,10 @@ package ru.yandex.explore.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.explore.user.dto.NewUserDto;
 import ru.yandex.explore.user.dto.UserDto;
 
 import javax.validation.Valid;
@@ -17,12 +17,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
 public class UserController {
-    @Autowired
     private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto addNewUser(@RequestBody @Valid UserDto userDto) {
+    public UserDto addNewUser(@RequestBody @Valid NewUserDto userDto) {
         log.info("Creating addNewUser {}{}", userDto.getName(), userDto.getEmail());
         return userService.addNewUser(userDto);
     }

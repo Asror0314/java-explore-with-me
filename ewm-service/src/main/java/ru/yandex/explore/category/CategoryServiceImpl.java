@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.yandex.explore.category.dto.CategoryDto;
+import ru.yandex.explore.category.dto.NewCategoryDto;
 import ru.yandex.explore.exception.NotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,11 +16,11 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository catRepository;
 
     @Override
-    public CategoryDto addNewCategory(CategoryDto categoryDto) {
-        final Category category = CategoryMapper.map2Category(categoryDto);
+    public CategoryDto addNewCategory(NewCategoryDto categoryDto) {
+        final Category category = CategoryMapper.mapNewCategoryDto2Category(categoryDto);
         final Category addedCategory = catRepository.save(category);
 
-        return CategoryMapper.map2CategoryDto(addedCategory);
+        return CategoryMapper.mapCategory2CategoryDto(addedCategory);
     }
 
     @Override
@@ -28,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
                 () -> new NotFoundException(String.format("category id = %d not found", catId))
         );
 
-        return CategoryMapper.map2CategoryDto(category);
+        return CategoryMapper.mapCategory2CategoryDto(category);
     }
 
     @Override
@@ -37,17 +38,17 @@ public class CategoryServiceImpl implements CategoryService {
         return catRepository
                 .findAll(page)
                 .stream()
-                .map(CategoryMapper::map2CategoryDto)
+                .map(CategoryMapper::mapCategory2CategoryDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public CategoryDto updateCategory(CategoryDto categoryDto, Long catId) {
+    public CategoryDto updateCategory(NewCategoryDto categoryDto, Long catId) {
         getCategoryById(catId);
-        final Category category = CategoryMapper.map2Category(categoryDto);
+        final Category category = CategoryMapper.mapNewCategoryDto2Category(categoryDto);
         final Category updatedCategory = catRepository.save(category);
 
-        return CategoryMapper.map2CategoryDto(updatedCategory);
+        return CategoryMapper.mapCategory2CategoryDto(updatedCategory);
     }
 
     @Override
