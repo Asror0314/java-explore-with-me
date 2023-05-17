@@ -2,16 +2,15 @@ package ru.yandex.explore.compilation.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.yandex.explore.event.Event;
-
-import java.util.Set;
+import ru.yandex.explore.event.dto.EventShortDto;
+import java.util.List;
 
 @Getter
 @Setter
 public class CompilationDto {
     private Long id;
 
-    private Set<Long> events;
+    private List<EventShortDto> events;
 
     private boolean pinned;
 

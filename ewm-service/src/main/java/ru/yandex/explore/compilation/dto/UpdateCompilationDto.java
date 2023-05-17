@@ -7,7 +7,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class NewCompilationDto {
+public class UpdateCompilationDto {
     private Set<Long> events;
     private boolean pinned;
     private String title;
