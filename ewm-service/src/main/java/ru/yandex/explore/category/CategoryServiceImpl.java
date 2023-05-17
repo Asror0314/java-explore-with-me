@@ -24,6 +24,21 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public CategoryDto updateCategory(NewCategoryDto categoryDto, Long catId) {
+        getCategoryById(catId);
+        final Category category = CategoryMapper.mapNewCategoryDto2Category(categoryDto);
+        final Category updatedCategory = catRepository.save(category);
+
+        return CategoryMapper.mapCategory2CategoryDto(updatedCategory);
+    }
+
+    @Override
+    public void deleteCategory(Long catId) {
+        catRepository.findById(catId);
+        catRepository.deleteById(catId);
+    }
+
+    @Override
     public CategoryDto getCategoryById(Long catId) {
         final Category category = catRepository.findById(catId).orElseThrow(
                 () -> new NotFoundException(String.format("category id = %d not found", catId))
@@ -42,18 +57,4 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public CategoryDto updateCategory(NewCategoryDto categoryDto, Long catId) {
-        getCategoryById(catId);
-        final Category category = CategoryMapper.mapNewCategoryDto2Category(categoryDto);
-        final Category updatedCategory = catRepository.save(category);
-
-        return CategoryMapper.mapCategory2CategoryDto(updatedCategory);
-    }
-
-    @Override
-    public void deleteCategory(Long catId) {
-        catRepository.findById(catId);
-        catRepository.deleteById(catId);
-    }
 }

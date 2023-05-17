@@ -25,21 +25,6 @@ public class CategoryController {
         return catService.addNewCategory(categoryDto);
     }
 
-    @GetMapping("/categories/{catId}")
-    CategoryDto getCategoryById(@PathVariable(name = "catId") Long catId) {
-        log.info("Get category with catId = {}", catId);
-        return catService.getCategoryById(catId);
-    }
-
-    @GetMapping("/categories")
-    List<CategoryDto> getCategories(
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
-        log.info("Get category with from = {}, size = {}", from, size);
-        return catService.getCategories(from, size);
-    }
-
     @PatchMapping("/admin/categories/{catId}")
     CategoryDto updateCategory(
             @RequestBody NewCategoryDto categoryDto,
@@ -55,4 +40,20 @@ public class CategoryController {
         log.info("delete category with catId = {}", catId);
         catService.deleteCategory(catId);
     }
+
+    @GetMapping("/categories/{catId}")
+    CategoryDto getCategoryById(@PathVariable(name = "catId") Long catId) {
+        log.info("Get category with catId = {}", catId);
+        return catService.getCategoryById(catId);
+    }
+
+    @GetMapping("/categories")
+    List<CategoryDto> getCategories(
+            @RequestParam(name = "from", defaultValue = "0") int from,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        log.info("Get category with from = {}, size = {}", from, size);
+        return catService.getCategories(from, size);
+    }
+
 }

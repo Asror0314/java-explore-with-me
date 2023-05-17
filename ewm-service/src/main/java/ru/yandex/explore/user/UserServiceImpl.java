@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long userId) {
         final User user = repository.findById(userId)
                 .orElseThrow(
-                        () -> new NotFoundException(String.format("User id = %d not found", userId)));
+                        () -> new NotFoundException(String.format("User with id = %d was not found", userId)));
 
         return UserMapper.mapUser2UserDto(user);
     }
