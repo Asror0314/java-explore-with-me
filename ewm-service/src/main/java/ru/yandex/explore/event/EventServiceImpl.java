@@ -26,7 +26,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository catRepository;
     private final LocationService locationService;
     private final UserService userService;
-    private final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
 
@@ -82,8 +82,8 @@ public class EventServiceImpl implements EventService {
             Integer size
     ) {
 
-        final LocalDateTime start = LocalDateTime.parse(rangeStart, DTF);
-        final LocalDateTime end = LocalDateTime.parse(rangeEnd, DTF);
+        final LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
+        final LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
 
         final List<Event> events =
                 eventRepository.findAllAdmin(users, states, categories, start, end, from, size);
