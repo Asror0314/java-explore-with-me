@@ -3,7 +3,6 @@ package ru.yandex.explore.event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ru.yandex.explore.event.dto.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;

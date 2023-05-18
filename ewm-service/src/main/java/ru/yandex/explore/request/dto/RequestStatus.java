@@ -1,7 +1,5 @@
 package ru.yandex.explore.request.dto;
 
-import ru.yandex.explore.event.dto.EventState;
-
 import java.util.Optional;
 
 public enum RequestStatus {

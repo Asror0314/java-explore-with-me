@@ -13,7 +13,7 @@ import java.time.format.DateTimeParseException;
 
 @RestControllerAdvice
 public class ErrorHandleController {
-    private final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -30,7 +30,9 @@ public class ErrorHandleController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(final NotFoundException e) {
-        return new ErrorResponse("NOT_FOUND", "For the requested operation the conditions are not met", e.getMessage(), LocalDateTime.now().format(DTF));
+        return new ErrorResponse("NOT_FOUND",
+                "For the requested operation the conditions are not met",
+                e.getMessage(), LocalDateTime.now().format(formatter));
     }
 
     @ExceptionHandler

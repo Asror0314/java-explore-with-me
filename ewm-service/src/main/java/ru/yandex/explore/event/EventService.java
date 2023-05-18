@@ -1,9 +1,7 @@
 package ru.yandex.explore.event;
 
-import org.springframework.web.bind.annotation.RequestParam;
 import ru.yandex.explore.event.dto.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
