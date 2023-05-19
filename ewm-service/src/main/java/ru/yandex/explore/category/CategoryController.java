@@ -3,10 +3,12 @@ package ru.yandex.explore.category;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.category.dto.CategoryDto;
 import ru.yandex.explore.category.dto.NewCategoryDto;
+import ru.yandex.explore.category.dto.UpdateCategoryDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -19,6 +21,7 @@ public class CategoryController {
     private final CategoryService catService;
 
     @PostMapping("/admin/categories")
+    @Transactional
     @ResponseStatus(HttpStatus.CREATED)
     CategoryDto addNewCategory(@RequestBody @Valid NewCategoryDto categoryDto) {
         log.info("Add new category");
@@ -27,7 +30,7 @@ public class CategoryController {
 
     @PatchMapping("/admin/categories/{catId}")
     CategoryDto updateCategory(
-            @RequestBody NewCategoryDto categoryDto,
+            @RequestBody UpdateCategoryDto categoryDto,
             @PathVariable(name = "catId") Long catId
     ) {
         log.info("Update category with catId = {}", catId);
@@ -35,6 +38,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/admin/categories/{catId}")
+    @Transactional
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteCategory(@PathVariable(name = "catId") Long catId) {
         log.info("delete category with catId = {}", catId);

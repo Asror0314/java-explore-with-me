@@ -21,6 +21,6 @@ public class UpdateEventAdminDto {
     private boolean paid;
     private int participantLimit;
     private boolean requestModeration;
-    private EventState stateAction;
+    private EventStateAction stateAction;
     private String title;
 }

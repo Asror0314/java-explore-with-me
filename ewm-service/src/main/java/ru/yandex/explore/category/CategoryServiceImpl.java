@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.explore.category.dto.CategoryDto;
 import ru.yandex.explore.category.dto.NewCategoryDto;
+import ru.yandex.explore.category.dto.UpdateCategoryDto;
 import ru.yandex.explore.exception.NotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,9 +26,9 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto updateCategory(NewCategoryDto categoryDto, Long catId) {
+    public CategoryDto updateCategory(UpdateCategoryDto categoryDto, Long catId) {
         getCategoryById(catId);
-        final Category category = CategoryMapper.mapNewCategoryDto2Category(categoryDto);
+        final Category category = CategoryMapper.mapUpdateCategoryDto2Category(categoryDto, catId);
         final Category updatedCategory = catRepository.save(category);
 
         return CategoryMapper.mapCategory2CategoryDto(updatedCategory);

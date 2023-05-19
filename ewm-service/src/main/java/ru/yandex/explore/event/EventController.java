@@ -41,7 +41,6 @@ public class EventController {
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}")
-    @ResponseStatus()
     public EventFullDto updateEventUser(
             @RequestBody UpdateEventUserDto eventDto,
             @PathVariable(name = "userId") Long initiatorId,
@@ -61,7 +60,6 @@ public class EventController {
     }
 
     @PatchMapping("/admin/events/{eventId}")
-    @ResponseStatus()
     public EventFullDto updateEventAdmin(
             @RequestBody UpdateEventAdminDto eventDto,
             @PathVariable(name = "eventId") Long eventId

@@ -3,10 +3,7 @@ package ru.yandex.explore.event;
 import ru.yandex.explore.category.Category;
 import ru.yandex.explore.category.CategoryMapper;
 import ru.yandex.explore.category.dto.CategoryDto;
-import ru.yandex.explore.event.dto.EventFullDto;
-import ru.yandex.explore.event.dto.EventShortDto;
-import ru.yandex.explore.event.dto.EventState;
-import ru.yandex.explore.event.dto.NewEventDto;
+import ru.yandex.explore.event.dto.*;
 import ru.yandex.explore.location.Location;
 import ru.yandex.explore.location.LocationMapper;
 import ru.yandex.explore.location.dto.LocationDto;
@@ -50,6 +47,7 @@ public class EventMapper {
         eventFullDto.setId(event.getId());
         eventFullDto.setAnnotation(event.getAnnotation());
         eventFullDto.setCategory(category);
+        eventFullDto.setConfirmedRequests(event.getConfirmedRequests());
         eventFullDto.setCreatedOn(event.getCreatedOn());
         eventFullDto.setDescription(event.getDescription());
         eventFullDto.setEventDate(event.getEventDate());
@@ -57,6 +55,7 @@ public class EventMapper {
         eventFullDto.setLocation(locationDto);
         eventFullDto.setPaid(event.isPaid());
         eventFullDto.setParticipantLimit(event.getParticipantLimit());
+        eventFullDto.setPublishedOn(event.getPublishedOn());
         eventFullDto.setRequestModeration(event.isRequestModeration());
         eventFullDto.setState(event.getState());
         eventFullDto.setTitle(event.getTitle());
@@ -78,5 +77,12 @@ public class EventMapper {
         eventShortDto.setTitle(event.getTitle());
 
         return eventShortDto;
+    }
+
+    public static Event map2Event(UpdateEventAdminDto updateEventDto) {
+        final Event event = new Event();
+
+
+        return event;
     }
 }

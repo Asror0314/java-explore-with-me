@@ -2,6 +2,7 @@ package ru.yandex.explore.category;
 
 import ru.yandex.explore.category.dto.CategoryDto;
 import ru.yandex.explore.category.dto.NewCategoryDto;
+import ru.yandex.explore.category.dto.UpdateCategoryDto;
 
 public class CategoryMapper {
     public static Category mapNewCategoryDto2Category(NewCategoryDto categoryDto) {
@@ -11,10 +12,10 @@ public class CategoryMapper {
         return category;
     }
 
-    public static Category mapCategoryDto2Category(CategoryDto categoryDto) {
+    public static Category mapUpdateCategoryDto2Category(UpdateCategoryDto categoryDto, Long catId) {
         final Category category = new Category();
 
-        category.setId(categoryDto.getId());
+        category.setId(catId);
         category.setName(categoryDto.getName());
         return category;
     }

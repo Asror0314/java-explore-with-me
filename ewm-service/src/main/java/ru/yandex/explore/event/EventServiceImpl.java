@@ -9,6 +9,7 @@ import ru.yandex.explore.exception.EditRulesException;
 import ru.yandex.explore.exception.NotFoundException;
 import ru.yandex.explore.location.Location;
 import ru.yandex.explore.location.LocationService;
+import ru.yandex.explore.location.dto.LocationDto;
 import ru.yandex.explore.user.User;
 import ru.yandex.explore.user.UserRepository;
 import ru.yandex.explore.user.UserService;
@@ -28,6 +29,7 @@ public class EventServiceImpl implements EventService {
     private final LocationService locationService;
     private final UserService userService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final LocalDateTime createdOn = LocalDateTime.now();
 
     @Override
     public EventFullDto addNewEvent(NewEventDto newEventDto, Long initiatorId) {
@@ -58,8 +60,8 @@ public class EventServiceImpl implements EventService {
         if (event.getState().equals(EventState.REJECTED)
                 || event.getState().equals(EventState.PENDING)) {
             switch (updateEventDto.getStateAction()) {
-                case CANCEL_REVIEW: event.setState(EventState.REJECTED); break;
-                case PUBLISH_EVENT: event.setState(EventState.PUBLISHED); break;
+                case CANCEL_REVIEW: event.setState(EventState.CANCELED); break;
+                case PUBLISH_EVENT: event.setState(EventState.PENDING); break;
             }
             final Event updatedEvent = eventRepository.save(event);
 
@@ -80,12 +82,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventAdmin(UpdateEventAdminDto updateEventDto, Long eventId) {
+    public EventFullDto updateEventAdmin(UpdateEventAdminDto eventDto, Long eventId) {
         final Event event = findEventById(eventId);
-        event.setState(updateEventDto.getStateAction());
-        final Event updatedEvent = eventRepository.save(event);
+        final Location location = event.getLocation();
+        final Category category = findCategoryById(eventDto.getCategory());
+        final EventState updateState = validUpdateEventAdmin(event, eventDto);
+        validLocation(location, eventDto.getLocation());
 
-        return EventMapper.mapEvent2EventFullDto(updatedEvent);
+        eventRepository
+                    .updateEvent(eventId, eventDto.getAnnotation(), category, eventDto.getDescription(),
+                            eventDto.getEventDate(), location, eventDto.isPaid(), eventDto.getParticipantLimit(),
+                            eventDto.isRequestModeration(), updateState, eventDto.getTitle());
+
+            final Event updatedEvent = eventRepository.findById(eventId).get();
+
+            return EventMapper.mapEvent2EventFullDto(updatedEvent);
+
     }
 
     @Override
@@ -127,4 +139,41 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(
                         () -> new NotFoundException(String.format("Category with id = %d was not found", catId)));
     }
+
+    private EventState validUpdateEventAdmin(Event event, UpdateEventAdminDto eventDto) {
+        EventState updateState = EventState.PENDING;
+
+        if (event.getEventDate().isAfter(createdOn.plusHours(1)) ) {
+            switch (eventDto.getStateAction()) {
+                case CANCEL_REVIEW: {
+                    if (event.getState().equals(EventState.PUBLISHED)) {
+                        throw new EditRulesException(String.format("Cannot cancel the event because it's not in the right state: %s", event.getState()));
+                    }
+                    updateState = EventState.CANCELED;
+                    break;
+                }
+                case PUBLISH_EVENT: {
+                    if (!event.getState().equals(EventState.PENDING)) {
+                        throw new EditRulesException(String.format("Cannot publish the event because it's not in the right state: %s", event.getState()));
+                    }
+                    updateState = EventState.PUBLISHED;
+                    break;
+                }
+            }
+            return updateState;
+        } else {
+            throw new EditRulesException("the create date of the event to be changed must be no earlier than one hour from the publication date");
+        }
+    }
+
+    private void validLocation(Location location, LocationDto locationDto) {
+        double newLat = location.getLat();
+        double newLon = location.getLon();
+        if (location.getLat() != newLat
+                || location.getLon() != newLon) {
+            location.setLat(newLat);
+            location.setLon(newLon);
+        }
+    }
+
 }

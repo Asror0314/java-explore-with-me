@@ -3,7 +3,7 @@ package ru.yandex.explore.event.dto;
 import java.util.Optional;
 
 public enum EventState {
-    PENDING, PUBLISHED, CONFIRMED, REJECTED;
+    PENDING, PUBLISHED, CONFIRMED, REJECTED, CANCELED;
 
     public static Optional<EventState> from(String stringState) {
         for (EventState state : values()) {

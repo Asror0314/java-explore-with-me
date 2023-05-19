@@ -23,6 +23,8 @@ public class Event {
     @ManyToOne()
     @JoinColumn(name = "category_id")
     private Category category;
+    @Column(name = "confirmed_requests")
+    private int confirmedRequests;
     @Column(name = "created_date")
     private LocalDateTime createdOn;
     @Column(name = "description")
@@ -39,6 +41,8 @@ public class Event {
     private boolean paid;
     @Column(name = "participant_limit")
     private int participantLimit;
+    @Column(name = "published_date")
+    private LocalDateTime publishedOn;
     @Column(name = "request_moderation")
     private boolean requestModeration;
     @Enumerated(EnumType.STRING)
