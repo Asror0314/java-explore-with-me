@@ -36,10 +36,10 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=postgresql://ewm-db:5432/explore
+      - SPRING_DATASOURCE_URL=postgresql://db:5432/explore
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
-      - DB_HOST=ewm-db
+      - DB_HOST=db
       - DB_PORT=5432
 
   ewm-db:
