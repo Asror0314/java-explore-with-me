@@ -9,17 +9,17 @@ services:
     depends_on:
       - stats-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5433/stats
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - DB_HOST=stats-db
-      - DB_PORT=5432
+      - DB_PORT=5433
 
   stats-db:
     image: postgres:14-alpine
     container_name: stats_db
     ports:
-      - "6541:5432"
+      - "6541:5433"
     depends_on:
       - ewm-service
     environment:
@@ -36,7 +36,7 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=postgresql://db:5432/explore
+      - SPRING_DATASOURCE_URL=postgresql://ewm-db:5432/explore
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
       - DB_HOST=db
