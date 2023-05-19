@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.explore.category.Category;
 import ru.yandex.explore.category.CategoryRepository;
 import ru.yandex.explore.event.dto.*;
+import ru.yandex.explore.exception.EditRulesException;
 import ru.yandex.explore.exception.NotFoundException;
 import ru.yandex.explore.location.Location;
 import ru.yandex.explore.location.LocationService;
@@ -28,17 +29,12 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-
-
     @Override
     public EventFullDto addNewEvent(NewEventDto newEventDto, Long initiatorId) {
-        final Long categoryId = newEventDto.getCategory();
-        final User initiator = userRepository.findById(initiatorId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("User with id = %d was not found", initiatorId)));
-        final Category category = catRepository.findById(categoryId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("Category with id = %d was not found", categoryId)));
+        final User initiator = findUserById(initiatorId);
+
+        final Long catId = newEventDto.getCategory();
+        final Category category = findCategoryById(catId);
         final Location location = locationService.addNewLocation(newEventDto.getLocation());
 
         final Event event = EventMapper.mapNewEventDto2Event(newEventDto, initiator, category, location);
@@ -48,23 +44,44 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventUser(UpdateEventUserRequest updateEventDto, Long initiatorId, Long eventId) {
-        final Event event = eventRepository.findById(eventId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("Event with id = %d was not found", eventId)));
+    public List<EventShortDto> getEventsUser(Long initiatorId, int from, int size) {
+        userService.getUserById(initiatorId);
+        final List<Event> events = eventRepository.findAllByInitiator(initiatorId, from, size);
 
-        event.setState(updateEventDto.getStateAction());
-        final Event updatedEvent = eventRepository.save(event);
-
-        return EventMapper.mapEvent2EventFullDto(updatedEvent);
+        return events.stream().map(EventMapper::mapEvent2EventShortDto).collect(Collectors.toList());
     }
 
     @Override
-    public EventFullDto updateEventAdmin(UpdateEventAdminRequest updateEventDto, Long eventId) {
-        final Event event = eventRepository.findById(eventId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("Event with id = %d was not found", eventId)));
+    public EventFullDto updateEventUser(UpdateEventUserDto updateEventDto, Long initiatorId, Long eventId) {
+        final Event event = findEventById(eventId);
 
+        if (event.getState().equals(EventState.REJECTED)
+                || event.getState().equals(EventState.PENDING)) {
+            switch (updateEventDto.getStateAction()) {
+                case CANCEL_REVIEW: event.setState(EventState.REJECTED); break;
+                case PUBLISH_EVENT: event.setState(EventState.PUBLISHED); break;
+            }
+            final Event updatedEvent = eventRepository.save(event);
+
+            return EventMapper.mapEvent2EventFullDto(updatedEvent);
+        } else {
+             throw new EditRulesException("Only pending or canceled events can be changed");
+        }
+
+
+    }
+
+    @Override
+    public EventFullDto getEventUserById(Long initiatorId, Long eventId) {
+        findUserById(initiatorId);
+        final Event event = findEventById(eventId);
+
+        return EventMapper.mapEvent2EventFullDto(event);
+    }
+
+    @Override
+    public EventFullDto updateEventAdmin(UpdateEventAdminDto updateEventDto, Long eventId) {
+        final Event event = findEventById(eventId);
         event.setState(updateEventDto.getStateAction());
         final Event updatedEvent = eventRepository.save(event);
 
@@ -93,23 +110,21 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<EventShortDto> getEventsUser(Long initiatorId, int from, int size) {
-        userService.getUserById(initiatorId);
-        final List<Event> events = eventRepository.findAllByInitiator(initiatorId, from, size);
-
-        return events.stream().map(EventMapper::mapEvent2EventShortDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public EventFullDto getEventUserById(Long initiatorId, Long eventId) {
-        userRepository.findById(initiatorId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("User with id = %d was not found", initiatorId)));
-        final Event event = eventRepository.findById(eventId)
+    private Event findEventById(Long eventId) {
+        return eventRepository.findById(eventId)
                 .orElseThrow(
                         () -> new NotFoundException(String.format("Event with id = %d was not found", eventId)));
+    }
 
-        return EventMapper.mapEvent2EventFullDto(event);
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new NotFoundException(String.format("User with id = %d was not found", userId)));
+    }
+
+    private Category findCategoryById(Long catId) {
+        return catRepository.findById(catId)
+                .orElseThrow(
+                        () -> new NotFoundException(String.format("Category with id = %d was not found", catId)));
     }
 }

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.event.dto.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 import java.util.Set;
 
@@ -28,10 +30,20 @@ public class EventController {
         return service.addNewEvent(newEventDto, initiatorId);
     }
 
+    @GetMapping("/users/{userId}/events")
+    public List<EventShortDto> getEventUser(
+            @PathVariable(name = "userId") Long initiatorId,
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        log.info("Get events with userId={}");
+        return service.getEventsUser(initiatorId, from, size);
+    }
+
     @PatchMapping("/users/{userId}/events/{eventId}")
     @ResponseStatus()
     public EventFullDto updateEventUser(
-            @RequestBody UpdateEventUserRequest eventDto,
+            @RequestBody UpdateEventUserDto eventDto,
             @PathVariable(name = "userId") Long initiatorId,
             @PathVariable(name = "eventId") Long eventId
     ) {
@@ -39,10 +51,19 @@ public class EventController {
         return service.updateEventUser(eventDto, initiatorId, eventId);
     }
 
+    @GetMapping("/users/{userId}/events/{eventId}")
+    public EventFullDto getEventUserById(
+            @PathVariable(name = "userId") Long initiatorId,
+            @PathVariable(name = "eventId") Long eventId
+    ) {
+        log.info("Get event with userId={}, eventId={}", initiatorId, eventId);
+        return service.getEventUserById(initiatorId, eventId);
+    }
+
     @PatchMapping("/admin/events/{eventId}")
     @ResponseStatus()
     public EventFullDto updateEventAdmin(
-            @RequestBody UpdateEventAdminRequest eventDto,
+            @RequestBody UpdateEventAdminDto eventDto,
             @PathVariable(name = "eventId") Long eventId
     ) {
         log.info("updating event with eventId={}", eventId);
@@ -58,31 +79,12 @@ public class EventController {
             String rangeStart,
             @RequestParam(name = "rangeEnd")
             String rangeEnd,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size
+            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
         log.info("Get events for admin with users={}, states={}, categories={}, rangeStart={}, " +
                 "rangeEnd={}, from={}, size={}", users, states, categories, rangeStart, rangeEnd, from, size);
         return service.getEventsAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
-    }
-
-    @GetMapping("/users/{userId}/events")
-    public List<EventShortDto> getEventUser(
-            @PathVariable(name = "userId") Long initiatorId,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size
-    ) {
-        log.info("Get events with userId={}");
-        return service.getEventsUser(initiatorId, from, size);
-    }
-
-    @GetMapping("/users/{userId}/events/{eventId}")
-    public EventFullDto getEventUserById(
-            @PathVariable(name = "userId") Long initiatorId,
-            @PathVariable(name = "eventId") Long eventId
-    ) {
-        log.info("Get event with userId={}, eventId={}", initiatorId, eventId);
-        return service.getEventUserById(initiatorId, eventId);
     }
 
 }

@@ -34,6 +34,7 @@ public class CompilationServiceImpl implements CompilationService {
         final Compilation updateComp = CompilationMapper.mapUpdateCompilationDto2Compilation(compDto, events);
         updateComp.setId(compId);
 
+
         final Compilation updatedComp = compRepository.save(updateComp);
         return CompilationMapper.mapCompilation2CompilationDto(updatedComp);
     }

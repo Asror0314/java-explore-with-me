@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class UpdateEventAdminRequest {
+public class UpdateEventUserDto {
     private String annotation;
     private Long category;
     private String description;
@@ -21,6 +21,6 @@ public class UpdateEventAdminRequest {
     private boolean paid;
     private int participantLimit;
     private boolean requestModeration;
-    private EventState stateAction;
+    private EventStateAction stateAction;
     private String title;
 }

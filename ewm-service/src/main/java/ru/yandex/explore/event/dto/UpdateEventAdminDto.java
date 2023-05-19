@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class UpdateEventUserRequest {
+public class UpdateEventAdminDto {
     private String annotation;
     private Long category;
     private String description;
