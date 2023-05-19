@@ -79,9 +79,10 @@ public class EventMapper {
         return eventShortDto;
     }
 
-    public static Event map2Event(UpdateEventAdminDto updateEventDto) {
-        final Event event = new Event();
-
+    public static Event map2Event(UpdateEventUserDto eventDto, Event event) {
+        event.setAnnotation(eventDto.getAnnotation());
+        event.setEventDate(eventDto.getEventDate());
+        event.setAnnotation(eventDto.getAnnotation());
 
         return event;
     }

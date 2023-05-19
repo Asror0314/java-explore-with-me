@@ -143,7 +143,7 @@ public class EventServiceImpl implements EventService {
     private EventState validUpdateEventAdmin(Event event, UpdateEventAdminDto eventDto) {
         EventState updateState = EventState.PENDING;
 
-        if (event.getEventDate().isAfter(createdOn.plusHours(1)) ) {
+        if (event.getEventDate().isAfter(createdOn.plusHours(1))) {
             switch (eventDto.getStateAction()) {
                 case CANCEL_REVIEW: {
                     if (event.getState().equals(EventState.PUBLISHED)) {
