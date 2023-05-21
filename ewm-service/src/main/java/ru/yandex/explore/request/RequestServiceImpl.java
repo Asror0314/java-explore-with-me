@@ -61,7 +61,7 @@ public class RequestServiceImpl implements RequestService {
         findUserById(requesterId);
         final Request request = findRequestById(requestId);
 
-        if (request.getRequester().getId() != requesterId) {
+        if (!request.getRequester().getId().equals(requesterId)) {
             throw new EditRulesException(String.format("Requester id=%d mismatch", requesterId));
         }
 
@@ -171,7 +171,7 @@ public class RequestServiceImpl implements RequestService {
             throw new EditRulesException("Can't add a repeat request");
         }
 
-        if (event.getInitiator().getId() == requester.getId()) {
+        if (event.getInitiator().equals(requester)) {
             throw new EditRulesException(String.format("Initiator id=%d of the event cannot add a request " +
                     "to participate in his event", requester.getId()));
         }
