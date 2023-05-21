@@ -230,7 +230,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void validEventDate(int hour, LocalDateTime dateTime){
+    private void validEventDate(int hour, LocalDateTime dateTime) {
         if (dateTime.isBefore((nowDateTime.plusHours(hour)))) {
             throw new EditRulesException(String.format("Field: eventDate. Error: должно содержать дату, " +
                     "которая еще не наступила. Value: %s", dateTime));
