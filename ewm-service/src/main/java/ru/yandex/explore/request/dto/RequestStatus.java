@@ -3,7 +3,7 @@ package ru.yandex.explore.request.dto;
 import java.util.Optional;
 
 public enum RequestStatus {
-    PENDING, CONFIRMED, CANCEL_REVIEW;
+    PENDING, CONFIRMED, CANCELED, REJECTED, CANCEL_REVIEW;
 
     public static Optional<RequestStatus> from(String stringStatus) {
         for (RequestStatus status : values()) {

@@ -46,7 +46,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public List<CompilationDto> getCompilations(boolean pinned, int from, int size) {
+    public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         final List<Compilation> compilations = compRepository.getCompilations(pinned, from, size);
 
         return compilations

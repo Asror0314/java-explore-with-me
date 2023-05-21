@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class ParticipationRequestDto {
+public class RequestDto {
     private Long id;
     private LocalDateTime created;
     private Long event;
     private Long requester;
-    private EventState status;
+    private RequestStatus status;
 }

@@ -22,46 +22,99 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiator(Long initiatorId, int from, int size);
 
     @Query(value = "SELECT e.* FROM explore.event AS e " +
-            "WHERE e.initiator_id IN ?1 " +
-            "AND e.state IN ?2 " +
-            "AND e.category_id IN ?3 " +
-            "AND e.event_date BETWEEN ?4 AND ?5 " +
-            "LIMIT ?7 OFFSET ?6", nativeQuery = true)
+            "WHERE e.initiator_id in :users " +
+            "AND e.state in :states " +
+            "AND e.category_id in :categories " +
+            "AND e.event_date BETWEEN :rangeStart AND :rangeEnd " +
+            "LIMIT :size OFFSET :from", nativeQuery = true)
     List<Event> findAllAdmin(
-            Set<Integer> users,
-            Set<String> states,
-            Set<Integer> categories,
-            LocalDateTime rangeStart,
-            LocalDateTime rangeEnd,
-            Integer from,
-            Integer size
+            @Param(value = "users") Set<Long> users,
+            @Param(value = "states") Set<String> states,
+            @Param(value = "categories") Set<Long> categories,
+            @Param(value = "rangeStart") LocalDateTime rangeStart,
+            @Param(value = "rangeEnd") LocalDateTime rangeEnd,
+            @Param(value = "from") int from,
+            @Param(value = "size") int size
     );
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("UPDATE Event as e SET " +
-            "e.annotation=:annotation, " +
-            "e.category=:category, " +
-            "e.description=:description, " +
-            "e.eventDate=:eventDate, " +
-            "e.location=:location, " +
-            "e.paid=:paid, " +
-            "e.participantLimit=:participantLimit, " +
-            "e.requestModeration=:requestModeration, " +
+            "e.annotation=COALESCE(:annotation, e.annotation), " +
+            "e.category=COALESCE(:category, e.category), " +
+            "e.createdOn=COALESCE(:createdOn, e.createdOn), " +
+            "e.description=COALESCE(:description, e.description), " +
+            "e.eventDate=COALESCE(:eventDate, e.eventDate), " +
+            "e.location=COALESCE(:location, e.location), " +
+            "e.paid=COALESCE(:paid, e.paid), " +
+            "e.participantLimit=COALESCE(:participantLimit, e.participantLimit), " +
+            "e.requestModeration=COALESCE(:requestModeration, e.requestModeration), " +
             "e.state=:state, " +
-            "e.title=:title " +
+            "e.title=COALESCE(:title, e.title) " +
             "WHERE e.id =:id")
-    void updateEvent(
+    void updateEventUser(
             @Param(value = "id") Long id,
             @Param(value = "annotation") String annotation,
             @Param(value = "category") Category category,
+            @Param(value = "createdOn") LocalDateTime createdOn,
             @Param(value = "description") String description,
             @Param(value = "eventDate") LocalDateTime eventDate,
             @Param(value = "location") Location location,
-            @Param(value = "paid") boolean paid,
-            @Param(value = "participantLimit") int participantLimit,
-            @Param(value = "requestModeration") boolean requestModeration,
+            @Param(value = "paid") Boolean paid,
+            @Param(value = "participantLimit") Integer participantLimit,
+            @Param(value = "requestModeration") Boolean requestModeration,
             @Param(value = "state") EventState state,
             @Param(value = "title") String title
+    );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("UPDATE Event as e SET " +
+            "e.annotation=COALESCE(:annotation, e.annotation), " +
+            "e.category=COALESCE(:category, e.category), " +
+            "e.createdOn=COALESCE(:createdOn, e.createdOn), " +
+            "e.description=COALESCE(:description, e.description), " +
+            "e.eventDate=COALESCE(:eventDate, e.eventDate), " +
+            "e.location=COALESCE(:location, e.location), " +
+            "e.paid=COALESCE(:paid, e.paid), " +
+            "e.participantLimit=COALESCE(:participantLimit, e.participantLimit), " +
+            "e.requestModeration=COALESCE(:requestModeration, e.requestModeration), " +
+            "e.publishedOn=:date, " +
+            "e.state=:state, " +
+            "e.title=COALESCE(:title, e.title) " +
+            "WHERE e.id =:id")
+    void updateEventAdmin(
+            @Param(value = "id") Long id,
+            @Param(value = "annotation") String annotation,
+            @Param(value = "category") Category category,
+            @Param(value = "createdOn") LocalDateTime createdOn,
+            @Param(value = "description") String description,
+            @Param(value = "eventDate") LocalDateTime eventDate,
+            @Param(value = "location") Location location,
+            @Param(value = "paid") Boolean paid,
+            @Param(value = "participantLimit") Integer participantLimit,
+            @Param(value = "requestModeration") Boolean requestModeration,
+            @Param(value = "date") LocalDateTime publishedOn,
+            @Param(value = "state") EventState state,
+            @Param(value = "title") String title
+    );
+
+    @Query(value = "SELECT e.* FROM explore.event AS e " +
+            "WHERE (e.annotation ilike COALESCE(:text, e.annotation) " +
+            "OR e.description ilike COALESCE(:text, e.description)) " +
+            "AND e.category_id in :categories " +
+            "AND e.paid = COALESCE(:paid, e.paid) " +
+            "AND e.state = 'PUBLISHED' " +
+            "AND e.event_date BETWEEN :rangeStart AND :rangeEnd " +
+            "ORDER BY e.event_date ASC " +
+            "LIMIT :size OFFSET :from", nativeQuery = true)
+    List<Event> findAllPublishWithSortEventDate(
+            @Param(value = "text") String text,
+            @Param(value = "categories") Set<Long> categories,
+            @Param(value = "paid") Boolean paid,
+            @Param(value = "rangeStart") LocalDateTime rangeStart,
+            @Param(value = "rangeEnd") LocalDateTime rangeEnd,
+            @Param(value = "from") int from,
+            @Param(value = "size") int size
     );
 }

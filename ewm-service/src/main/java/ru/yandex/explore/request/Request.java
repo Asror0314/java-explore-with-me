@@ -3,17 +3,17 @@ package ru.yandex.explore.request;
 import lombok.Getter;
 import lombok.Setter;
 import ru.yandex.explore.event.Event;
-import ru.yandex.explore.event.dto.EventState;
+import ru.yandex.explore.request.dto.RequestStatus;
 import ru.yandex.explore.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(schema = "explore", name = "participation")
+@Table(schema = "explore", name = "request")
 @Getter
 @Setter
-public class ParticipationRequest {
+public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,5 +26,5 @@ public class ParticipationRequest {
     @JoinColumn(name = "requester_id")
     private User requester;
     @Enumerated(EnumType.STRING)
-    private EventState status;
+    private RequestStatus status;
 }

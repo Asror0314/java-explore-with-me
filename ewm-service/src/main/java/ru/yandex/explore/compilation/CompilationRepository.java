@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
     @Query(value = "SELECT c.* from explore.compilation as c " +
-            "WHERE c.pinned = ?1 " +
+            "WHERE c.pinned = COALESCE(?1, c.pinned) " +
             "LIMIT ?3 OFFSET ?2", nativeQuery = true)
-    List<Compilation> getCompilations(boolean pinned, int from, int size);
+    List<Compilation> getCompilations(Boolean pinned, int from, int size);
 }

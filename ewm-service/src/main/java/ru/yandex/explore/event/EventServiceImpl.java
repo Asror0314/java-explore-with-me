@@ -29,17 +29,18 @@ public class EventServiceImpl implements EventService {
     private final LocationService locationService;
     private final UserService userService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final LocalDateTime createdOn = LocalDateTime.now();
+    private final LocalDateTime nowDateTime = LocalDateTime.now();
 
     @Override
     public EventFullDto addNewEvent(NewEventDto newEventDto, Long initiatorId) {
         final User initiator = findUserById(initiatorId);
+        validEventDate(2, newEventDto.getEventDate());
 
         final Long catId = newEventDto.getCategory();
         final Category category = findCategoryById(catId);
         final Location location = locationService.addNewLocation(newEventDto.getLocation());
-
         final Event event = EventMapper.mapNewEventDto2Event(newEventDto, initiator, category, location);
+
         final Event addedEvent = eventRepository.save(event);
 
         return EventMapper.mapEvent2EventFullDto(addedEvent);
@@ -54,21 +55,27 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventUser(UpdateEventUserDto updateEventDto, Long initiatorId, Long eventId) {
+    public EventFullDto updateEventUser(UpdateEventUserDto eventDto, Long initiatorId, Long eventId) {
+        findUserById(initiatorId);
         final Event event = findEventById(eventId);
+        final EventState eventState = validUpdateEventUser(event, eventDto);
+        event.setState(eventState);
+        validLocation(event.getLocation(), eventDto.getLocation());
 
-        if (event.getState().equals(EventState.REJECTED)
-                || event.getState().equals(EventState.PENDING)) {
-            switch (updateEventDto.getStateAction()) {
-                case CANCEL_REVIEW: event.setState(EventState.CANCELED); break;
-                case PUBLISH_EVENT: event.setState(EventState.PENDING); break;
-            }
-            final Event updatedEvent = eventRepository.save(event);
-
-            return EventMapper.mapEvent2EventFullDto(updatedEvent);
+        final Category category;
+        if (eventDto.getCategory() != null) {
+            category = findCategoryById(eventDto.getCategory());
         } else {
-             throw new EditRulesException("Only pending or canceled events can be changed");
+            category = event.getCategory();
         }
+
+        eventRepository.updateEventUser(eventId, eventDto.getAnnotation(), category, nowDateTime, eventDto.getDescription(),
+                eventDto.getEventDate(), event.getLocation(), eventDto.getPaid(), eventDto.getParticipantLimit(), eventDto.getRequestModeration(),
+                eventState, eventDto.getTitle());
+
+        final Event savedEvent = eventRepository.findById(eventId).orElseThrow();
+
+        return EventMapper.mapEvent2EventFullDto(savedEvent);
 
 
     }
@@ -85,40 +92,73 @@ public class EventServiceImpl implements EventService {
     public EventFullDto updateEventAdmin(UpdateEventAdminDto eventDto, Long eventId) {
         final Event event = findEventById(eventId);
         final Location location = event.getLocation();
-        final Category category = findCategoryById(eventDto.getCategory());
         final EventState updateState = validUpdateEventAdmin(event, eventDto);
         validLocation(location, eventDto.getLocation());
 
+        final Category category;
+        if (eventDto.getCategory() != 0) {
+            category = findCategoryById(eventDto.getCategory());
+        } else {
+            category = event.getCategory();
+        }
+
         eventRepository
-                    .updateEvent(eventId, eventDto.getAnnotation(), category, eventDto.getDescription(),
-                            eventDto.getEventDate(), location, eventDto.isPaid(), eventDto.getParticipantLimit(),
-                            eventDto.isRequestModeration(), updateState, eventDto.getTitle());
+                    .updateEventAdmin(eventId, eventDto.getAnnotation(), category, nowDateTime, eventDto.getDescription(),
+                            eventDto.getEventDate(), location, eventDto.getPaid(), eventDto.getParticipantLimit(),
+                            eventDto.getRequestModeration(), nowDateTime, updateState, eventDto.getTitle());
 
-            final Event updatedEvent = eventRepository.findById(eventId).get();
-
-            return EventMapper.mapEvent2EventFullDto(updatedEvent);
-
+        final Event updatedEvent = eventRepository.findById(eventId).get();
+        return EventMapper.mapEvent2EventFullDto(updatedEvent);
     }
 
     @Override
     public List<EventFullDto> getEventsAdmin(
-            Set<Integer> users,
+            Set<Long> users,
             Set<String> states,
-            Set<Integer> categories,
+            Set<Long> categories,
             String rangeStart,
             String rangeEnd,
-            Integer from,
-            Integer size
+            int from,
+            int size
     ) {
-
-        final LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
-        final LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
+        final List<LocalDateTime> requestDateTime = validRequestDateTime(rangeStart, rangeEnd);
 
         final List<Event> events =
-                eventRepository.findAllAdmin(users, states, categories, start, end, from, size);
+                eventRepository.findAllAdmin(users, states, categories, requestDateTime.get(0), requestDateTime.get(1), from, size);
         return events
                 .stream()
                 .map(EventMapper::mapEvent2EventFullDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public EventFullDto getPublishEventById(Long eventId) {
+        final Event event = findEventById(eventId);
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException(String.format("Event with id = %d was not found!", eventId));
+        }
+
+        return EventMapper.mapEvent2EventFullDto(event);
+    }
+
+    @Override
+    public List<EventShortDto> getPublishEvents(
+            String text,
+            Set<Long> categories,
+            Boolean paid,
+            String rangeStart,
+            String rangeEnd,
+            Boolean onlyAvailable,
+            String sort,
+            int from,
+            int size
+    ) {
+        final List<LocalDateTime> requestDateTime = validRequestDateTime(rangeStart, rangeEnd);
+        final List<Event> events = eventRepository.findAllPublishWithSortEventDate(text, categories, paid,
+                                requestDateTime.get(0), requestDateTime.get(1), from, size);
+        return events
+                .stream()
+                .map(EventMapper::mapEvent2EventShortDto)
                 .collect(Collectors.toList());
     }
 
@@ -142,27 +182,41 @@ public class EventServiceImpl implements EventService {
 
     private EventState validUpdateEventAdmin(Event event, UpdateEventAdminDto eventDto) {
         EventState updateState = EventState.PENDING;
+        validEventDate(1, event.getEventDate());
 
-        if (event.getEventDate().isAfter(createdOn.plusHours(1))) {
-            switch (eventDto.getStateAction()) {
-                case CANCEL_REVIEW: {
-                    if (event.getState().equals(EventState.PUBLISHED)) {
-                        throw new EditRulesException(String.format("Cannot cancel the event because it's not in the right state: %s", event.getState()));
-                    }
-                    updateState = EventState.CANCELED;
-                    break;
+        switch (eventDto.getStateAction()) {
+            case CANCEL_REVIEW: {
+                if (event.getState().equals(EventState.PUBLISHED)) {
+                    throw new EditRulesException(String.format("Cannot cancel the event because it's not in the right state: %s", event.getState()));
                 }
-                case PUBLISH_EVENT: {
-                    if (!event.getState().equals(EventState.PENDING)) {
-                        throw new EditRulesException(String.format("Cannot publish the event because it's not in the right state: %s", event.getState()));
-                    }
-                    updateState = EventState.PUBLISHED;
-                    break;
-                }
+                updateState = EventState.CANCELED;
+                break;
             }
-            return updateState;
+            case PUBLISH_EVENT: {
+                if (!event.getState().equals(EventState.PENDING)) {
+                    throw new EditRulesException(String.format("Cannot publish the event because it's not in the right state: %s", event.getState()));
+                }
+                updateState = EventState.PUBLISHED;
+                break;
+            }
+        }
+        return updateState;
+    }
+
+    private EventState validUpdateEventUser(Event event, UpdateEventUserDto updateEventDto) {
+        validEventDate(2, event.getEventDate());
+
+        if (event.getState().equals(EventState.REJECTED)
+                || event.getState().equals(EventState.PENDING)) {
+            switch (updateEventDto.getStateAction()) {
+                case CANCEL_REVIEW: {
+                    return EventState.CANCELED;
+                }
+                case PUBLISH_EVENT: return EventState.PENDING;
+                default: return event.getState();
+            }
         } else {
-            throw new EditRulesException("the create date of the event to be changed must be no earlier than one hour from the publication date");
+            throw new EditRulesException("Only pending or canceled events can be changed");
         }
     }
 
@@ -176,4 +230,24 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    private void validEventDate(int hour, LocalDateTime dateTime){
+        if (dateTime.isBefore((nowDateTime.plusHours(hour)))) {
+            throw new EditRulesException(String.format("Field: eventDate. Error: должно содержать дату, " +
+                    "которая еще не наступила. Value: %s", dateTime));
+        }
+    }
+
+    private List<LocalDateTime> validRequestDateTime(String rangeStart, String rangeEnd) {
+        LocalDateTime start;
+        LocalDateTime end;
+
+        if (rangeStart == null) {
+            start = nowDateTime;
+            end = LocalDateTime.MAX;
+        } else {
+            start = LocalDateTime.parse(rangeStart, formatter);
+            end = LocalDateTime.parse(rangeEnd, formatter);
+        }
+        return List.of(start, end);
+    }
 }

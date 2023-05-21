@@ -6,6 +6,7 @@ import lombok.Setter;
 import ru.yandex.explore.location.dto.LocationDto;
 
 import javax.validation.constraints.Future;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -13,10 +14,12 @@ import java.time.LocalDateTime;
 @Setter
 public class NewEventDto {
     @NotNull
+    @NotBlank
     private String annotation;
     @NotNull
     private Long category;
     @NotNull
+    @NotBlank
     private String description;
     @NotNull
     @Future(message = "должно содержать дату, которая еще не наступила")
@@ -28,5 +31,6 @@ public class NewEventDto {
     private int participantLimit;
     private boolean requestModeration;
     @NotNull
+    @NotBlank
     private String title;
 }

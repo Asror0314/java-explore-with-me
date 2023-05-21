@@ -9,6 +9,8 @@ import ru.yandex.explore.compilation.dto.CompilationDto;
 import ru.yandex.explore.compilation.dto.NewCompilationDto;
 import ru.yandex.explore.compilation.dto.UpdateCompilationDto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
@@ -21,7 +23,7 @@ public class CompilationController {
     @PostMapping("/admin/compilations")
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto addNewCompilation(
-            @RequestBody NewCompilationDto compDto
+            @Valid @RequestBody NewCompilationDto compDto
             ) {
         log.info("Creating new compilation");
         return service.addNewCompilation(compDto);
@@ -29,22 +31,22 @@ public class CompilationController {
 
     @PatchMapping("/admin/compilations/{compId}")
     public CompilationDto updateCompilation(
-            @RequestBody UpdateCompilationDto compDto,
-            @PathVariable(name = "compId") Long compId
+            @Valid @RequestBody UpdateCompilationDto compDto,
+            @Positive @PathVariable(name = "compId") Long compId
             ) {
         log.info("Creating new compilation with compId={}", compId);
         return service.updateCompilation(compDto, compId);
     }
 
     @GetMapping("/compilations/{compId}")
-    public CompilationDto getCompilationById(@PathVariable(name = "compId") Long compId) {
+    public CompilationDto getCompilationById(@Positive @PathVariable(name = "compId") Long compId) {
         log.info("Get compilation with id={}", compId);
         return service.getCompilationById(compId);
     }
 
     @GetMapping("/compilations")
     public List<CompilationDto> getCompilations(
-            @RequestParam(name = "pinned") boolean pinned,
+            @RequestParam(name = "pinned", required = false) Boolean pinned,
             @RequestParam(name = "from", defaultValue = "0") int from,
             @RequestParam(name = "size", defaultValue = "10") int size) {
         log.info("Get compilations with pinned={}, from={}, size={}", pinned, from, size);

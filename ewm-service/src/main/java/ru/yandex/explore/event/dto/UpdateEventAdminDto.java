@@ -18,9 +18,9 @@ public class UpdateEventAdminDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     private LocationDto location;
-    private boolean paid;
-    private int participantLimit;
-    private boolean requestModeration;
+    private Boolean paid;
+    private Integer participantLimit;
+    private Boolean requestModeration;
     private EventStateAction stateAction;
     private String title;
 }

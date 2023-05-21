@@ -12,8 +12,12 @@ import ru.yandex.explore.user.UserMapper;
 import ru.yandex.explore.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class EventMapper {
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final LocalDateTime nowDateTime = LocalDateTime.now();
+
     public static Event mapNewEventDto2Event(
             NewEventDto newEventDto,
             User initiator,
@@ -24,7 +28,7 @@ public class EventMapper {
 
         event.setAnnotation(newEventDto.getAnnotation());
         event.setCategory(category);
-        event.setCreatedOn(LocalDateTime.now());
+        event.setCreatedOn(nowDateTime);
         event.setDescription(newEventDto.getDescription());
         event.setEventDate(newEventDto.getEventDate());
         event.setInitiator(initiator);
@@ -34,6 +38,7 @@ public class EventMapper {
         event.setRequestModeration(newEventDto.isRequestModeration());
         event.setState(EventState.PENDING);
         event.setTitle(newEventDto.getTitle());
+        event.setLimitAvailable(true);
 
         return event;
     }
@@ -71,6 +76,7 @@ public class EventMapper {
         eventShortDto.setId(event.getId());
         eventShortDto.setAnnotation(event.getAnnotation());
         eventShortDto.setCategory(category);
+        eventShortDto.setConfirmedRequests(event.getConfirmedRequests());
         eventShortDto.setEventDate(event.getEventDate());
         eventShortDto.setInitiator(initiator);
         eventShortDto.setPaid(event.isPaid());
@@ -79,11 +85,4 @@ public class EventMapper {
         return eventShortDto;
     }
 
-    public static Event map2Event(UpdateEventUserDto eventDto, Event event) {
-        event.setAnnotation(eventDto.getAnnotation());
-        event.setEventDate(eventDto.getEventDate());
-        event.setAnnotation(eventDto.getAnnotation());
-
-        return event;
-    }
 }
