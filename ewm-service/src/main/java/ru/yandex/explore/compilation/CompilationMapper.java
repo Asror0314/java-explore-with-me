@@ -15,7 +15,7 @@ public class CompilationMapper {
         final Compilation compilation = new Compilation();
 
         compilation.setEvents(events);
-        compilation.setPinned(compilationDto.isPinned());
+        compilation.setPinned(compilationDto.getPinned());
         compilation.setTitle(compilationDto.getTitle());
         return compilation;
     }
@@ -24,7 +24,7 @@ public class CompilationMapper {
         final Compilation compilation = new Compilation();
 
         compilation.setEvents(events);
-        compilation.setPinned(compilationDto.isPinned());
+        compilation.setPinned(compilationDto.getPinned());
         compilation.setTitle(compilationDto.getTitle());
         return compilation;
     }
@@ -39,7 +39,7 @@ public class CompilationMapper {
 
         compilationDto.setId(compilation.getId());
         compilationDto.setEvents(eventShortDtos);
-        compilationDto.setPinned(compilation.isPinned());
+        compilationDto.setPinned(compilation.getPinned());
         compilationDto.setTitle(compilation.getTitle());
 
         return compilationDto;

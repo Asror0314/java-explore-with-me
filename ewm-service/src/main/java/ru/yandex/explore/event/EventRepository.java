@@ -22,10 +22,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiator(Long initiatorId, int from, int size);
 
     @Query(value = "SELECT e.* FROM explore.event AS e " +
-            "WHERE e.initiator_id in :users " +
-            "AND e.state in :states " +
-            "AND e.category_id in :categories " +
-            "AND e.event_date BETWEEN :rangeStart AND :rangeEnd " +
+            "WHERE (:users is null or e.initiator_id in :users) " +
+            "AND (:states is null or e.state ilike :states) " +
+            "AND (:categories is null or e.category_id in :categories) " +
+            "AND e.event_date BETWEEN COALESCE(:rangeStart, e.event_date) " +
+            "AND COALESCE(:rangeEnd, e.event_date) " +
             "LIMIT :size OFFSET :from", nativeQuery = true)
     List<Event> findAllAdmin(
             @Param(value = "users") Set<Long> users,
@@ -102,10 +103,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query(value = "SELECT e.* FROM explore.event AS e " +
             "WHERE (e.annotation ilike COALESCE(:text, e.annotation) " +
             "OR e.description ilike COALESCE(:text, e.description)) " +
-            "AND e.category_id in :categories " +
+            "AND (:categories is null or e.category_id in :categories) " +
             "AND e.paid = COALESCE(:paid, e.paid) " +
             "AND e.state = 'PUBLISHED' " +
-            "AND e.event_date BETWEEN :rangeStart AND :rangeEnd " +
+            "AND e.event_date BETWEEN COALESCE(:rangeStart, e.event_date) " +
+            "AND COALESCE(:rangeEnd, e.event_date) " +
             "ORDER BY e.event_date ASC " +
             "LIMIT :size OFFSET :from", nativeQuery = true)
     List<Event> findAllPublishWithSortEventDate(

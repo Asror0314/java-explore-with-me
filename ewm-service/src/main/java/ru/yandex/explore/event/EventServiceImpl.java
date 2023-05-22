@@ -1,6 +1,7 @@
 package ru.yandex.explore.event;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.yandex.explore.category.Category;
 import ru.yandex.explore.category.CategoryRepository;
@@ -10,12 +11,15 @@ import ru.yandex.explore.exception.NotFoundException;
 import ru.yandex.explore.location.Location;
 import ru.yandex.explore.location.LocationService;
 import ru.yandex.explore.location.dto.LocationDto;
+import ru.yandex.explore.stats.StatsClient;
 import ru.yandex.explore.user.User;
 import ru.yandex.explore.user.UserRepository;
 import ru.yandex.explore.user.UserService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,8 +32,10 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository catRepository;
     private final LocationService locationService;
     private final UserService userService;
+    private final StatsClient statsClient;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final LocalDateTime nowDateTime = LocalDateTime.now();
+    private final String dateTime = LocalDateTime.now().format(formatter);
+    private final LocalDateTime createdOn = LocalDateTime.parse(dateTime, formatter);
 
     @Override
     public EventFullDto addNewEvent(NewEventDto newEventDto, Long initiatorId) {
@@ -69,7 +75,7 @@ public class EventServiceImpl implements EventService {
             category = event.getCategory();
         }
 
-        eventRepository.updateEventUser(eventId, eventDto.getAnnotation(), category, nowDateTime, eventDto.getDescription(),
+        eventRepository.updateEventUser(eventId, eventDto.getAnnotation(), category, createdOn, eventDto.getDescription(),
                 eventDto.getEventDate(), event.getLocation(), eventDto.getPaid(), eventDto.getParticipantLimit(), eventDto.getRequestModeration(),
                 eventState, eventDto.getTitle());
 
@@ -96,16 +102,16 @@ public class EventServiceImpl implements EventService {
         validLocation(location, eventDto.getLocation());
 
         final Category category;
-        if (eventDto.getCategory() != 0) {
+        if (eventDto.getCategory() != null) {
             category = findCategoryById(eventDto.getCategory());
         } else {
             category = event.getCategory();
         }
 
         eventRepository
-                    .updateEventAdmin(eventId, eventDto.getAnnotation(), category, nowDateTime, eventDto.getDescription(),
+                    .updateEventAdmin(eventId, eventDto.getAnnotation(), category, createdOn, eventDto.getDescription(),
                             eventDto.getEventDate(), location, eventDto.getPaid(), eventDto.getParticipantLimit(),
-                            eventDto.getRequestModeration(), nowDateTime, updateState, eventDto.getTitle());
+                            eventDto.getRequestModeration(), createdOn, updateState, eventDto.getTitle());
 
         final Event updatedEvent = eventRepository.findById(eventId).get();
         return EventMapper.mapEvent2EventFullDto(updatedEvent);
@@ -121,10 +127,12 @@ public class EventServiceImpl implements EventService {
             int from,
             int size
     ) {
-        final List<LocalDateTime> requestDateTime = validRequestDateTime(rangeStart, rangeEnd);
+        final LocalDateTime startDate = validRequestDateTime(rangeStart);
+        final LocalDateTime endDate = validRequestDateTime(rangeEnd);
 
         final List<Event> events =
-                eventRepository.findAllAdmin(users, states, categories, requestDateTime.get(0), requestDateTime.get(1), from, size);
+                eventRepository.findAllAdmin(users, states, categories,
+                        startDate, endDate, from, size);
         return events
                 .stream()
                 .map(EventMapper::mapEvent2EventFullDto)
@@ -137,6 +145,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException(String.format("Event with id = %d was not found!", eventId));
         }
+        getCountHits(eventId);
 
         return EventMapper.mapEvent2EventFullDto(event);
     }
@@ -153,13 +162,22 @@ public class EventServiceImpl implements EventService {
             int from,
             int size
     ) {
-        final List<LocalDateTime> requestDateTime = validRequestDateTime(rangeStart, rangeEnd);
+        final LocalDateTime startDate = validRequestDateTime(rangeStart);
+        final LocalDateTime endDate = validRequestDateTime(rangeEnd);
         final List<Event> events = eventRepository.findAllPublishWithSortEventDate(text, categories, paid,
-                                requestDateTime.get(0), requestDateTime.get(1), from, size);
+                                startDate, endDate, from, size);
         return events
                 .stream()
                 .map(EventMapper::mapEvent2EventShortDto)
                 .collect(Collectors.toList());
+    }
+
+    private int getCountHits(Long eventId) {
+        final List<String> uris = Arrays.asList(String.format("/events/%d", eventId));
+        final ResponseEntity<Object> stats = statsClient
+                .getStats(LocalDateTime.now().minusYears(2).format(formatter), dateTime, uris, true);
+        System.out.println(stats.getBody().toString());
+        return 1;
     }
 
     private Event findEventById(Long eventId) {
@@ -185,11 +203,11 @@ public class EventServiceImpl implements EventService {
         validEventDate(1, event.getEventDate());
 
         switch (eventDto.getStateAction()) {
-            case CANCEL_REVIEW: {
+            case REJECT_EVENT: {
                 if (event.getState().equals(EventState.PUBLISHED)) {
                     throw new EditRulesException(String.format("Cannot cancel the event because it's not in the right state: %s", event.getState()));
                 }
-                updateState = EventState.CANCELED;
+                updateState = EventState.REJECTED;
                 break;
             }
             case PUBLISH_EVENT: {
@@ -212,7 +230,7 @@ public class EventServiceImpl implements EventService {
                 case CANCEL_REVIEW: {
                     return EventState.CANCELED;
                 }
-                case PUBLISH_EVENT: return EventState.PENDING;
+                case SEND_TO_REVIEW: return EventState.PENDING;
                 default: return event.getState();
             }
         } else {
@@ -231,23 +249,18 @@ public class EventServiceImpl implements EventService {
     }
 
     private void validEventDate(int hour, LocalDateTime dateTime) {
-        if (dateTime.isBefore((nowDateTime.plusHours(hour)))) {
+        if (dateTime.isBefore((createdOn.plusHours(hour)))) {
             throw new EditRulesException(String.format("Field: eventDate. Error: должно содержать дату, " +
                     "которая еще не наступила. Value: %s", dateTime));
         }
     }
 
-    private List<LocalDateTime> validRequestDateTime(String rangeStart, String rangeEnd) {
-        LocalDateTime start;
-        LocalDateTime end;
+    private LocalDateTime validRequestDateTime(String dateTime) {
 
-        if (rangeStart == null) {
-            start = nowDateTime;
-            end = LocalDateTime.MAX;
+        if (dateTime == null) {
+            return null;
         } else {
-            start = LocalDateTime.parse(rangeStart, formatter);
-            end = LocalDateTime.parse(rangeEnd, formatter);
+            return LocalDateTime.parse(dateTime, formatter);
         }
-        return List.of(start, end);
     }
 }

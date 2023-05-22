@@ -9,6 +9,6 @@ import java.util.Set;
 @Setter
 public class UpdateCompilationDto {
     private Set<Long> events;
-    private boolean pinned;
+    private Boolean pinned;
     private String title;
 }

@@ -3,6 +3,7 @@ package ru.yandex.explore.stats.hit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.explore.stats.dto.HitDto;
+import ru.yandex.explore.stats.dto.NewHitDto;
 import ru.yandex.explore.stats.dto.StatsDto;
 import ru.yandex.explore.stats.hit.model.Hit;
 
@@ -17,9 +18,9 @@ public class HitServiceImpl implements HitService {
     private HitRepository repository;
 
     @Override
-    public HitDto addNewHit(HitDto hitDto) {
-        final Hit savedHit = repository.save(HitMapper.mapHit(hitDto));
-        return HitMapper.mapHitDto(savedHit);
+    public HitDto addNewHit(NewHitDto hitDto) {
+        final Hit savedHit = repository.save(HitMapper.map2Hit(hitDto));
+        return HitMapper.map2HitDto(savedHit);
     }
 
     @Override

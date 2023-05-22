@@ -3,7 +3,7 @@ package ru.yandex.explore.event.dto;
 import java.util.Optional;
 
 public enum EventStateAction {
-    PUBLISH_EVENT, CANCEL_REVIEW;
+    SEND_TO_REVIEW, PUBLISH_EVENT, CANCEL_REVIEW, REJECT_EVENT;
 
     public static Optional<EventStateAction> from(String stringState) {
         for (EventStateAction state : values()) {

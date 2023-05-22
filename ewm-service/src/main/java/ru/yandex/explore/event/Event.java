@@ -49,8 +49,6 @@ public class Event {
     private EventState state;
     @Column(name = "title")
     private String title;
-    @Column(name = "view")
-    private int view;
     @Column(name = "limit_available")
     private boolean limitAvailable;
 }

@@ -16,6 +16,7 @@ import ru.yandex.explore.user.User;
 import ru.yandex.explore.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,9 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository repository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final String dateTime = LocalDateTime.now().format(formatter);
+    private final LocalDateTime createdOn = LocalDateTime.parse(dateTime, formatter);
 
     @Override
     @Transactional
@@ -35,7 +39,7 @@ public class RequestServiceImpl implements RequestService {
         validParticipationRequest(event, requester);
 
         final Request request = new Request();
-        request.setCreated(LocalDateTime.now());
+        request.setCreated(createdOn);
         request.setRequester(requester);
         request.setEvent(event);
 
@@ -76,7 +80,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         request.setStatus(RequestStatus.CANCELED);
-        request.setCreated(LocalDateTime.now());
+        request.setCreated(createdOn);
         final Request canceledRequest = repository.save(request);
 
         return RequestMapper.mapRequest2RequestDto(canceledRequest);

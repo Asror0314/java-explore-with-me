@@ -7,10 +7,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.event.dto.*;
+import ru.yandex.explore.stats.StatsClient;
+import ru.yandex.explore.stats.dto.HitDto;
+import ru.yandex.explore.stats.dto.NewHitDto;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -21,6 +27,11 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class EventController {
     private final EventService service;
+    private final StatsClient statsClient;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final String dateTime = LocalDateTime.now().format(formatter);
+    private final LocalDateTime createdOn = LocalDateTime.parse(dateTime, formatter);
+    private final String app = "ewm-main-service";
 
     @PostMapping("/users/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
@@ -46,7 +57,7 @@ public class EventController {
     @PatchMapping("/users/{userId}/events/{eventId}")
     @Transactional
     public EventFullDto updateEventUser(
-            @RequestBody UpdateEventUserDto eventDto,
+            @Valid @RequestBody UpdateEventUserDto eventDto,
             @Positive @PathVariable(name = "userId") Long initiatorId,
             @Positive @PathVariable(name = "eventId") Long eventId
     ) {
@@ -66,7 +77,7 @@ public class EventController {
     @PatchMapping("/admin/events/{eventId}")
     @Transactional
     public EventFullDto updateEventAdmin(
-            @RequestBody UpdateEventAdminDto eventDto,
+            @Valid @RequestBody UpdateEventAdminDto eventDto,
             @Positive @PathVariable(name = "eventId") Long eventId
     ) {
         log.info("updating event with eventId={}", eventId);
@@ -89,7 +100,11 @@ public class EventController {
     }
 
     @GetMapping("/events/{id}")
-    public EventFullDto getPublishEventById(@Positive @PathVariable(name = "id") Long eventId) {
+    public EventFullDto getPublishEventById(
+            @Positive @PathVariable(name = "id") Long eventId,
+            HttpServletRequest request
+    ) {
+//        addNewHit(request);
         log.info("Get event with id={}", eventId);
         return service.getPublishEventById(eventId);
     }
@@ -104,11 +119,20 @@ public class EventController {
         @RequestParam(name = "onlyAvailable", required = false) Boolean onlyAvailable,
         @RequestParam(name = "sort", required = false) String sort,
         @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") int from,
-        @Positive @RequestParam(name = "size", defaultValue = "10") int size
+        @Positive @RequestParam(name = "size", defaultValue = "10") int size,
+        HttpServletRequest request
     ) {
+//        addNewHit(request);
         log.info("Get publish events with taxt={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
                 "onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         return service.getPublishEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+    }
+
+    private void addNewHit(HttpServletRequest request) {
+        log.info("client ip: {}", request.getRemoteUser());
+        log.info("endpoint path: {}", request.getRequestURI());
+        final NewHitDto newHitDto = new NewHitDto(app, request.getRequestURI(), request.getRemoteUser(), createdOn);
+        statsClient.addNewHit(newHitDto);
     }
 }

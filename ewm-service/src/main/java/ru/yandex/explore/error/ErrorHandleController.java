@@ -1,6 +1,11 @@
 package ru.yandex.explore.error;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,14 +22,24 @@ public class ErrorHandleController {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleDateTimeParse(final DateTimeParseException e) {
-        return new ErrorResponse(e.getMessage());
+        return new ErrorResponse("CONFLICT",
+                "For the requested operation the conditions are not met",
+                e.getMessage(), LocalDateTime.now().format(formatter));
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final ValidationException e) {
+    public ErrorResponse handleValidation(final MissingServletRequestParameterException e) {
+        return new ErrorResponse("BAD_REQUEST",
+                "Incorrectly made request",
+                e.getMessage(), LocalDateTime.now().format(formatter));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
         return new ErrorResponse("BAD_REQUEST",
                 "Incorrectly made request",
                 e.getMessage(), LocalDateTime.now().format(formatter));
@@ -43,6 +58,14 @@ public class ErrorHandleController {
     public ErrorResponse handleEditRules(final EditRulesException e) {
         return new ErrorResponse("FORBIDDEN",
                 "For the requested operation the conditions are not met",
+                e.getMessage(), LocalDateTime.now().format(formatter));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConstraintViolation(final DataIntegrityViolationException e) {
+        return new ErrorResponse("CONFLICT",
+                "Integrity constraint has been violated.",
                 e.getMessage(), LocalDateTime.now().format(formatter));
     }
 
