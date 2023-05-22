@@ -35,7 +35,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (compDto.getTitle() == null) {
             compDto.setTitle(compilation.getTitle());
         }
-        if(compDto.getPinned() == null) {
+        if (compDto.getPinned() == null) {
             compDto.setPinned(compilation.getPinned());
         }
 
