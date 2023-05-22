@@ -16,6 +16,7 @@ import ru.yandex.explore.user.User;
 import ru.yandex.explore.user.UserRepository;
 import ru.yandex.explore.user.UserService;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -149,7 +150,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException(String.format("Event with id = %d was not found!", eventId));
         }
-//        getCountHits(eventId);
+        getCountHits(eventId);
 
         return EventMapper.mapEvent2EventFullDto(event);
     }
@@ -180,7 +181,14 @@ public class EventServiceImpl implements EventService {
         final List<String> uris = Arrays.asList(String.format("/events/%d", eventId));
         final ResponseEntity<Object> stats = statsClient
                 .getStats(LocalDateTime.now().minusYears(2).format(formatter), dateTime, uris, true);
-        System.out.println(stats.getBody().toString());
+        Object body = stats.getBody();
+        Field hits = null;
+        try {
+            hits = body.getClass().getField("hits");
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+        hits.toString();
         return 1;
     }
 

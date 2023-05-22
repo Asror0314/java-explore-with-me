@@ -103,7 +103,7 @@ public class EventController {
             @Positive @PathVariable(name = "id") Long eventId,
             HttpServletRequest request
     ) {
-//        addNewHit(request);
+        addNewHit(request);
         log.info("Get event with id={}", eventId);
         return service.getPublishEventById(eventId);
     }
@@ -129,9 +129,11 @@ public class EventController {
     }
 
     private void addNewHit(HttpServletRequest request) {
-        log.info("client ip: {}", request.getRemoteUser());
+        log.info("client ip: {}", request.getRemoteAddr());
         log.info("endpoint path: {}", request.getRequestURI());
-        final NewHitDto newHitDto = new NewHitDto(app, request.getRequestURI(), request.getRemoteUser(), createdOn);
+
+        final NewHitDto newHitDto = new NewHitDto(app, request.getRequestURI(),
+                                        request.getRemoteAddr(), createdOn);
         statsClient.addNewHit(newHitDto);
     }
 }
