@@ -23,7 +23,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query(value = "SELECT e.* FROM explore.event AS e " +
             "WHERE (:users is null or e.initiator_id in :users) " +
-            "AND (:states is null or e.state ilike :states) " +
+            "AND ('' in :states or e.state in :states) " +
             "AND (:categories is null or e.category_id in :categories) " +
             "AND e.event_date BETWEEN COALESCE(:rangeStart, e.event_date) " +
             "AND COALESCE(:rangeEnd, e.event_date) " +

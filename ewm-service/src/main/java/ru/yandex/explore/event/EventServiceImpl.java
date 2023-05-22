@@ -19,6 +19,7 @@ import ru.yandex.explore.user.UserService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -129,6 +130,10 @@ public class EventServiceImpl implements EventService {
         final LocalDateTime startDate = validRequestDateTime(rangeStart);
         final LocalDateTime endDate = validRequestDateTime(rangeEnd);
 
+        if (states == null) {
+            states = new HashSet<>();
+            states.add("");
+        }
         final List<Event> events =
                 eventRepository.findAllAdmin(users, states, categories,
                         startDate, endDate, from, size);
@@ -144,7 +149,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new NotFoundException(String.format("Event with id = %d was not found!", eventId));
         }
-        getCountHits(eventId);
+//        getCountHits(eventId);
 
         return EventMapper.mapEvent2EventFullDto(event);
     }

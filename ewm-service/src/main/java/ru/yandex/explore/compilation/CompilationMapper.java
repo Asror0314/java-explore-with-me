@@ -20,12 +20,12 @@ public class CompilationMapper {
         return compilation;
     }
 
-    public static Compilation mapUpdateCompilationDto2Compilation(UpdateCompilationDto compilationDto, List<Event> events) {
+    public static Compilation mapUpdateCompilationDto2Compilation(UpdateCompilationDto compDto, List<Event> events) {
         final Compilation compilation = new Compilation();
 
+        compilation.setTitle(compDto.getTitle());
         compilation.setEvents(events);
-        compilation.setPinned(compilationDto.getPinned());
-        compilation.setTitle(compilationDto.getTitle());
+        compilation.setPinned(compDto.getPinned());
         return compilation;
     }
 

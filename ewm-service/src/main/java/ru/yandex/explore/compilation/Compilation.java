@@ -17,8 +17,8 @@ public class Compilation {
     private Long id;
     @ManyToMany()
     @JoinTable(schema = "explore", name = "compilation_event",
-    joinColumns = @JoinColumn(name = "event_id"),
-    inverseJoinColumns = @JoinColumn(name = "compilation_id"))
+    joinColumns = @JoinColumn(name = "compilation_id"),
+    inverseJoinColumns = @JoinColumn(name = "event_id"))
     private List<Event> events;
     @Column(name = "pinned")
     private Boolean pinned;

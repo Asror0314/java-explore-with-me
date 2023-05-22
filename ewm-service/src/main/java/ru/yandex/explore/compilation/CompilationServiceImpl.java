@@ -30,7 +30,14 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto updateCompilation(UpdateCompilationDto compDto, Long compId) {
         final List<Event> events = eventRepository.findAllById(compDto.getEvents());
-        findCompilationById(compId);
+        final Compilation compilation = findCompilationById(compId);
+
+        if (compDto.getTitle() == null) {
+            compDto.setTitle(compilation.getTitle());
+        }
+        if(compDto.getPinned() == null) {
+            compDto.setPinned(compilation.getPinned());
+        }
 
         final Compilation updateComp = CompilationMapper.mapUpdateCompilationDto2Compilation(compDto, events);
         updateComp.setId(compId);

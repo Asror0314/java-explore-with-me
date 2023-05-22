@@ -1,7 +1,9 @@
 package ru.yandex.explore.stats.hit;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.stats.dto.HitDto;
@@ -14,12 +16,14 @@ import java.util.List;
 @RestController
 @Slf4j
 @Validated
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class HitController {
 
-    @Autowired
-    private HitService service;
+    private final HitService service;
 
     @PostMapping("/hit")
+    @Transactional
     public HitDto addNewHit(@Valid @RequestBody NewHitDto hitDto) {
         log.info("Creating new hit");
         return service.addNewHit(hitDto);
