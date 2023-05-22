@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.yandex.explore.stats.client.BaseClient;
 import ru.yandex.explore.stats.dto.NewHitDto;
-import ru.yandex.explore.stats.dto.StatsDto;
 
 import java.util.List;
 import java.util.Map;
