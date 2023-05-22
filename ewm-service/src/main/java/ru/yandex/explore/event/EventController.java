@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.event.dto.*;
 import ru.yandex.explore.stats.StatsClient;
-import ru.yandex.explore.stats.dto.HitDto;
 import ru.yandex.explore.stats.dto.NewHitDto;
 
 import javax.servlet.http.HttpServletRequest;

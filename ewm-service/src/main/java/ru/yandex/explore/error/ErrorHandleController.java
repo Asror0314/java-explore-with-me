@@ -1,7 +1,5 @@
 package ru.yandex.explore.error;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.yandex.explore.exception.EditRulesException;
 import ru.yandex.explore.exception.NotFoundException;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;

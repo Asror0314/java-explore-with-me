@@ -7,7 +7,6 @@ import ru.yandex.explore.event.dto.*;
 import ru.yandex.explore.location.Location;
 import ru.yandex.explore.location.LocationMapper;
 import ru.yandex.explore.location.dto.LocationDto;
-import ru.yandex.explore.stats.StatsClient;
 import ru.yandex.explore.user.User;
 import ru.yandex.explore.user.UserMapper;
 import ru.yandex.explore.user.dto.UserShortDto;

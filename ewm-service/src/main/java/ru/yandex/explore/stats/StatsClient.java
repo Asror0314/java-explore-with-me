@@ -8,7 +8,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.yandex.explore.stats.client.BaseClient;
-import ru.yandex.explore.stats.dto.HitDto;
 import ru.yandex.explore.stats.dto.NewHitDto;
 
 import java.util.List;
