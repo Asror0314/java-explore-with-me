@@ -10,6 +10,7 @@ import ru.yandex.explore.event.EventRepository;
 import ru.yandex.explore.exception.NotFoundException;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +21,10 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto addNewCompilation(NewCompilationDto compDto) {
+        if (compDto.getEvents() == null) {
+            compDto.setEvents(Set.of());
+        }
+
         final List<Event> events = eventRepository.findAllById(compDto.getEvents());
         final Compilation compilation = CompilationMapper.mapNewCompilationDto2Compilation(compDto, events);
         final Compilation addedCompilation = compRepository.save(compilation);
@@ -29,14 +34,14 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto updateCompilation(UpdateCompilationDto compDto, Long compId) {
+        if (compDto.getEvents() == null) {
+            compDto.setEvents(Set.of());
+        }
         final List<Event> events = eventRepository.findAllById(compDto.getEvents());
         final Compilation compilation = findCompilationById(compId);
 
         if (compDto.getTitle() == null) {
             compDto.setTitle(compilation.getTitle());
-        }
-        if (compDto.getPinned() == null) {
-            compDto.setPinned(compilation.getPinned());
         }
 
         final Compilation updateComp = CompilationMapper.mapUpdateCompilationDto2Compilation(compDto, events);

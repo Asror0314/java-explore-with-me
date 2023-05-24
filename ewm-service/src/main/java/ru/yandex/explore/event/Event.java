@@ -51,4 +51,6 @@ public class Event {
     private String title;
     @Column(name = "limit_available")
     private boolean limitAvailable;
+    @Column(name = "views")
+    private Long views;
 }

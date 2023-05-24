@@ -22,9 +22,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiator(Long initiatorId, int from, int size);
 
     @Query(value = "SELECT e.* FROM explore.event AS e " +
-            "WHERE (:users is null or e.initiator_id in :users) " +
+            "WHERE (:users = 0 or e.initiator_id in :users)" +
             "AND ('' in :states or e.state in :states) " +
-            "AND (:categories is null or e.category_id in :categories) " +
+            "AND (:categories = 0 or e.category_id in :categories) " +
             "AND e.event_date BETWEEN COALESCE(:rangeStart, e.event_date) " +
             "AND COALESCE(:rangeEnd, e.event_date) " +
             "LIMIT :size OFFSET :from", nativeQuery = true)
@@ -103,7 +103,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query(value = "SELECT e.* FROM explore.event AS e " +
             "WHERE (e.annotation ilike COALESCE(:text, e.annotation) " +
             "OR e.description ilike COALESCE(:text, e.description)) " +
-            "AND (:categories is null or e.category_id in :categories) " +
+            "AND (:categories = 0 or e.category_id in :categories) " +
             "AND e.paid = COALESCE(:paid, e.paid) " +
             "AND e.state = 'PUBLISHED' " +
             "AND e.event_date BETWEEN COALESCE(:rangeStart, e.event_date) " +

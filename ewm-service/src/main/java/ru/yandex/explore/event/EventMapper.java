@@ -36,7 +36,7 @@ public class EventMapper {
         event.setLocation(location);
         event.setPaid(newEventDto.isPaid());
         event.setParticipantLimit(newEventDto.getParticipantLimit());
-        event.setRequestModeration(newEventDto.isRequestModeration());
+        event.setRequestModeration(newEventDto.getRequestModeration());
         event.setState(EventState.PENDING);
         event.setTitle(newEventDto.getTitle());
         event.setLimitAvailable(true);
@@ -65,7 +65,7 @@ public class EventMapper {
         eventFullDto.setRequestModeration(event.isRequestModeration());
         eventFullDto.setState(event.getState());
         eventFullDto.setTitle(event.getTitle());
-//        eventFullDto.setViews(view);
+        eventFullDto.setViews(event.getViews());
 
         return eventFullDto;
     }
@@ -83,7 +83,7 @@ public class EventMapper {
         eventShortDto.setInitiator(initiator);
         eventShortDto.setPaid(event.isPaid());
         eventShortDto.setTitle(event.getTitle());
-//        eventShortDto.setViews(view);
+        eventShortDto.setViews(event.getViews());
 
         return eventShortDto;
     }

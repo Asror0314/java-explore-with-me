@@ -2,6 +2,7 @@ package ru.yandex.explore.stats.hit;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ public class HitController {
 
     @PostMapping("/hit")
     @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
     public HitDto addNewHit(@Valid @RequestBody NewHitDto hitDto) {
         log.info("Creating new hit");
         return service.addNewHit(hitDto);

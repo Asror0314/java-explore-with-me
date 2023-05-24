@@ -15,7 +15,7 @@ public class CompilationMapper {
         final Compilation compilation = new Compilation();
 
         compilation.setEvents(events);
-        compilation.setPinned(compilationDto.getPinned());
+        compilation.setPinned(compilationDto.isPinned());
         compilation.setTitle(compilationDto.getTitle());
         return compilation;
     }
@@ -25,7 +25,7 @@ public class CompilationMapper {
 
         compilation.setTitle(compDto.getTitle());
         compilation.setEvents(events);
-        compilation.setPinned(compDto.getPinned());
+        compilation.setPinned(compDto.isPinned());
         return compilation;
     }
 

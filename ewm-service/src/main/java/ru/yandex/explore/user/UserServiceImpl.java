@@ -5,7 +5,9 @@ import ru.yandex.explore.exception.NotFoundException;
 import ru.yandex.explore.user.dto.NewUserDto;
 import ru.yandex.explore.user.dto.UserDto;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,11 +26,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUsersByIds(List<Long> ids) {
-        return repository.findAllById(ids)
+    public List<UserDto> getUsersByIds(Set<Long> ids, int from, int size) {
+        ids = validIdsIsNull(ids);
+        return repository.findUsersByIds(ids, from, size)
                 .stream()
                 .map(UserMapper::mapUser2UserDto)
                 .collect(Collectors.toList());
+    }
+
+    private Set<Long> validIdsIsNull(Set<Long> ids) {
+        if (ids == null) {
+            ids = new HashSet<>();
+            ids.add(0L);
+        }
+        return ids;
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.explore.exception.ConstraintViolationException;
 import ru.yandex.explore.exception.EditRulesException;
 import ru.yandex.explore.exception.NotFoundException;
 
@@ -28,7 +29,7 @@ public class ErrorHandleController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(final MissingServletRequestParameterException e) {
+    public ErrorResponse handleValidation(MissingServletRequestParameterException e) {
         return new ErrorResponse("BAD_REQUEST",
                 "Incorrectly made request",
                 e.getMessage(), LocalDateTime.now().format(formatter));
@@ -60,8 +61,16 @@ public class ErrorHandleController {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleConstraintViolation(final DataIntegrityViolationException e) {
+    public ErrorResponse handleDataIntegrityViolation(final DataIntegrityViolationException e) {
         return new ErrorResponse("CONFLICT",
+                "Integrity constraint has been violated.",
+                e.getMessage(), LocalDateTime.now().format(formatter));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolation(final ConstraintViolationException e) {
+        return new ErrorResponse("BAD_REQUEST",
                 "Integrity constraint has been violated.",
                 e.getMessage(), LocalDateTime.now().format(formatter));
     }

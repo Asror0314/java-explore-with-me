@@ -121,7 +121,7 @@ public class EventController {
         @Positive @RequestParam(name = "size", defaultValue = "10") int size,
         HttpServletRequest request
     ) {
-//        addNewHit(request);
+        addNewHit(request);
         log.info("Get publish events with taxt={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
                 "onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);

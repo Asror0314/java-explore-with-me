@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.explore.stats.dto.HitDto;
 import ru.yandex.explore.stats.dto.NewHitDto;
 import ru.yandex.explore.stats.dto.StatsDto;
+import ru.yandex.explore.stats.hit.error.ConstraintViolationException;
 import ru.yandex.explore.stats.hit.model.Hit;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,10 @@ public class HitServiceImpl implements HitService {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         final LocalDateTime startDate = LocalDateTime.parse(start, formatter);
         final LocalDateTime endDate = LocalDateTime.parse(end, formatter);
+
+        if (startDate.isAfter(endDate)) {
+            throw new ConstraintViolationException("The start date must be earlier than the end date");
+        }
 
         if (uris == null) {
             if (unique) {

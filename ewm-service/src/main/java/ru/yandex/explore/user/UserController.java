@@ -10,6 +10,7 @@ import ru.yandex.explore.user.dto.UserDto;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Validated
@@ -27,9 +28,12 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getUsers(@RequestParam(name = "ids") List<Long> ids) {
-        log.info("Get users with ids = {}", ids);
-        return userService.getUsersByIds(ids);
+    public List<UserDto> getUsers(
+            @RequestParam(name = "ids", required = false) Set<Long> ids,
+            @RequestParam(name = "from", defaultValue = "0") int from,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        log.info("Get users with ids = {}, from={}, size={}", ids, from, size);
+        return userService.getUsersByIds(ids, from, size);
     }
 
     @DeleteMapping("/{userId}")

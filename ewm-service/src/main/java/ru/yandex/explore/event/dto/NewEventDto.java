@@ -8,6 +8,7 @@ import ru.yandex.explore.location.dto.LocationDto;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,11 +16,13 @@ import java.time.LocalDateTime;
 public class NewEventDto {
     @NotNull
     @NotBlank
+    @Size(min = 20, max = 2000)
     private String annotation;
     @NotNull
     private Long category;
     @NotNull
     @NotBlank
+    @Size(min = 20, max = 7000)
     private String description;
     @NotNull
     @Future(message = "должно содержать дату, которая еще не наступила")
@@ -29,7 +32,7 @@ public class NewEventDto {
     private LocationDto location;
     private boolean paid;
     private int participantLimit;
-    private boolean requestModeration;
+    private Boolean requestModeration;
     @NotNull
     @NotBlank
     private String title;
