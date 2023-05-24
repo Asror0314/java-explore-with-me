@@ -38,9 +38,9 @@ public class EventServiceImpl implements EventService {
     private final LocationService locationService;
     private final UserService userService;
     private final StatsClient statsClient;
-    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final String DATETIME = LocalDateTime.now().format(FORMATTER);
-    private final LocalDateTime CREATED_DATE = LocalDateTime.parse(DATETIME, FORMATTER);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final String datetime = LocalDateTime.now().format(formatter);
+    private final LocalDateTime createdDate = LocalDateTime.parse(datetime, formatter);
 
     @Override
     public EventFullDto addNewEvent(NewEventDto newEventDto, Long initiatorId) {
@@ -84,7 +84,7 @@ public class EventServiceImpl implements EventService {
             category = event.getCategory();
         }
 
-        eventRepository.updateEventUser(eventId, eventDto.getAnnotation(), category, CREATED_DATE, eventDto.getDescription(),
+        eventRepository.updateEventUser(eventId, eventDto.getAnnotation(), category, createdDate, eventDto.getDescription(),
                 eventDto.getEventDate(), event.getLocation(), eventDto.getPaid(), eventDto.getParticipantLimit(), eventDto.getRequestModeration(),
                 eventState, eventDto.getTitle());
 
@@ -118,9 +118,9 @@ public class EventServiceImpl implements EventService {
         }
 
         eventRepository
-                    .updateEventAdmin(eventId, eventDto.getAnnotation(), category, CREATED_DATE, eventDto.getDescription(),
+                    .updateEventAdmin(eventId, eventDto.getAnnotation(), category, createdDate, eventDto.getDescription(),
                             eventDto.getEventDate(), location, eventDto.getPaid(), eventDto.getParticipantLimit(),
-                            eventDto.getRequestModeration(), CREATED_DATE, updateState, eventDto.getTitle());
+                            eventDto.getRequestModeration(), createdDate, updateState, eventDto.getTitle());
 
         final Event updatedEvent = eventRepository.findById(eventId).get();
         return EventMapper.mapEvent2EventFullDto(updatedEvent);
@@ -222,7 +222,7 @@ public class EventServiceImpl implements EventService {
         final String uriEventId = String.format("/events/%d", event.getId());
         final List<String> uris = Arrays.asList(uriEventId);
         final Object statsBody = statsClient
-                .getStats(LocalDateTime.now().minusYears(2).format(FORMATTER), DATETIME, uris, true)
+                .getStats(LocalDateTime.now().minusYears(2).format(formatter), datetime, uris, true)
                 .getBody();
 
         List<StatsDto> statsDto = new ObjectMapper().convertValue(statsBody, new TypeReference<>() {
@@ -319,7 +319,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void validEventDate(int hour, LocalDateTime dateTime) {
-        if (dateTime.isBefore((CREATED_DATE.plusHours(hour)))) {
+        if (dateTime.isBefore((createdDate.plusHours(hour)))) {
             throw new EditRulesException(String.format("Field: eventDate. Error: должно содержать дату, " +
                     "которая еще не наступила. Value: %s", dateTime));
         }
@@ -330,7 +330,7 @@ public class EventServiceImpl implements EventService {
         if (dateTime == null) {
             return null;
         } else {
-            return LocalDateTime.parse(dateTime, FORMATTER);
+            return LocalDateTime.parse(dateTime, formatter);
         }
     }
 }
