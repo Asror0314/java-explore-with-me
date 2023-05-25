@@ -35,5 +35,6 @@ public class NewEventDto {
     private Boolean requestModeration;
     @NotNull
     @NotBlank
+    @Size(min = 3, max = 120)
     private String title;
 }

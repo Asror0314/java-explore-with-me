@@ -25,5 +25,6 @@ public class UpdateEventUserDto {
     private Integer participantLimit;
     private Boolean requestModeration;
     private EventStateAction stateAction;
+    @Size(min = 3, max = 120)
     private String title;
 }
