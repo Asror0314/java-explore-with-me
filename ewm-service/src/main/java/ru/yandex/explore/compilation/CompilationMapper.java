@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CompilationMapper {
-    public static Compilation mapNewCompilationDto2Compilation(NewCompilationDto compilationDto, List<Event> events) {
+    public static Compilation mapNewCompilationDtoToCompilation(NewCompilationDto compilationDto, List<Event> events) {
         final Compilation compilation = new Compilation();
 
         compilation.setEvents(events);
@@ -20,7 +20,7 @@ public class CompilationMapper {
         return compilation;
     }
 
-    public static Compilation mapUpdateCompilationDto2Compilation(UpdateCompilationDto compDto, List<Event> events) {
+    public static Compilation mapUpdateCompilationDtoToCompilation(UpdateCompilationDto compDto, List<Event> events) {
         final Compilation compilation = new Compilation();
 
         compilation.setTitle(compDto.getTitle());
@@ -29,12 +29,12 @@ public class CompilationMapper {
         return compilation;
     }
 
-    public static CompilationDto mapCompilation2CompilationDto(Compilation compilation) {
+    public static CompilationDto mapCompilationToCompilationDto(Compilation compilation) {
         final CompilationDto compilationDto = new CompilationDto();
         final List<EventShortDto> eventShortDtos = compilation
                 .getEvents()
                 .stream()
-                .map(EventMapper::mapEvent2EventShortDto)
+                .map(EventMapper::mapEventToEventShortDto)
                 .collect(Collectors.toList());
 
         compilationDto.setId(compilation.getId());

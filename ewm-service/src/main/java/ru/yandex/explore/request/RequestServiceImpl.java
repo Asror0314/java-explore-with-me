@@ -56,7 +56,7 @@ public class RequestServiceImpl implements RequestService {
         }
         Request addedRequest = repository.save(request);
 
-        return RequestMapper.mapRequest2RequestDto(addedRequest);
+        return RequestMapper.mapRequestToRequestDto(addedRequest);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class RequestServiceImpl implements RequestService {
             throw new EditRulesException(String.format("Requester id=%d mismatch", requesterId));
         }
 
-        if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
+        if (RequestStatus.CONFIRMED.equals(request.getStatus())) {
             final Event event = request.getEvent();
 
             if (event.getParticipantLimit() > event.getConfirmedRequests() - 1) {
@@ -83,7 +83,7 @@ public class RequestServiceImpl implements RequestService {
         request.setCreated(createdOn);
         final Request canceledRequest = repository.save(request);
 
-        return RequestMapper.mapRequest2RequestDto(canceledRequest);
+        return RequestMapper.mapRequestToRequestDto(canceledRequest);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class RequestServiceImpl implements RequestService {
 
         return requests
                 .stream()
-                .map(RequestMapper::mapRequest2RequestDto)
+                .map(RequestMapper::mapRequestToRequestDto)
                 .collect(Collectors.toList());
     }
 
@@ -105,7 +105,7 @@ public class RequestServiceImpl implements RequestService {
 
         return requests
                 .stream()
-                .map(RequestMapper::mapRequest2RequestDto)
+                .map(RequestMapper::mapRequestToRequestDto)
                 .collect(Collectors.toList());
     }
 
@@ -149,7 +149,7 @@ public class RequestServiceImpl implements RequestService {
 
         final List<Request> updatedRequests = repository.findAllById(requestInitiatorDto.getRequestIds());
 
-        return RequestMapper.map2StatusUpdateResultDto(updatedRequests);
+        return RequestMapper.mapToStatusUpdateResultDto(updatedRequests);
     }
 
     private Request findRequestById(Long requestId) {
@@ -180,7 +180,7 @@ public class RequestServiceImpl implements RequestService {
                     "to participate in his event", requester.getId()));
         }
 
-        if (!event.getState().equals(EventState.PUBLISHED)) {
+        if (!EventState.PUBLISHED.equals(event.getState())) {
             throw new EditRulesException("Can't participate in an unpublished event");
         }
 
@@ -191,7 +191,7 @@ public class RequestServiceImpl implements RequestService {
 
     private void validUpdateStatusRequest(Event event, User initiator) {
         if (!event.getInitiator().equals(initiator)) {
-            throw new EditRulesException(String.format("event initiator id={} is mismatch", initiator.getId()));
+            throw new EditRulesException(String.format("event initiator id=%d is mismatch", initiator.getId()));
         }
 
         if (!event.isLimitAvailable()) {
@@ -221,7 +221,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void validStatusRequest(Request request) {
-        if (!request.getStatus().equals(RequestStatus.PENDING)) {
+        if (!RequestStatus.PENDING.equals(request.getStatus())) {
             throw new EditRulesException("Status can only be changed for applications that are in the pending state");
         }
     }

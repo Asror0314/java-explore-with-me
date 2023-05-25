@@ -19,7 +19,7 @@ public class EventMapper {
     private static final String dateTime = LocalDateTime.now().format(formatter);
     private static final LocalDateTime createdOn = LocalDateTime.parse(dateTime, formatter);
 
-    public static Event mapNewEventDto2Event(
+    public static Event mapNewEventDtoToEvent(
             NewEventDto newEventDto,
             User initiator,
             Category category,
@@ -44,11 +44,11 @@ public class EventMapper {
         return event;
     }
 
-    public static EventFullDto mapEvent2EventFullDto(Event event) {
+    public static EventFullDto mapEventToEventFullDto(Event event) {
         final EventFullDto eventFullDto = new EventFullDto();
         final UserShortDto initiator = UserMapper.mapUser2UserShortDto(event.getInitiator());
-        final CategoryDto category = CategoryMapper.mapCategory2CategoryDto(event.getCategory());
-        final LocationDto locationDto = LocationMapper.mapLocation2LocationDto(event.getLocation());
+        final CategoryDto category = CategoryMapper.mapCategoryToCategoryDto(event.getCategory());
+        final LocationDto locationDto = LocationMapper.mapLocationToLocationDto(event.getLocation());
 
         eventFullDto.setId(event.getId());
         eventFullDto.setAnnotation(event.getAnnotation());
@@ -70,10 +70,10 @@ public class EventMapper {
         return eventFullDto;
     }
 
-    public static EventShortDto mapEvent2EventShortDto(Event event) {
+    public static EventShortDto mapEventToEventShortDto(Event event) {
         final EventShortDto eventShortDto = new EventShortDto();
         final UserShortDto initiator = UserMapper.mapUser2UserShortDto(event.getInitiator());
-        final CategoryDto category = CategoryMapper.mapCategory2CategoryDto(event.getCategory());
+        final CategoryDto category = CategoryMapper.mapCategoryToCategoryDto(event.getCategory());
 
         eventShortDto.setId(event.getId());
         eventShortDto.setAnnotation(event.getAnnotation());

@@ -3,7 +3,7 @@ package ru.yandex.explore.location;
 import ru.yandex.explore.location.dto.LocationDto;
 
 public class LocationMapper {
-    public static Location mapLocationDto2Location(LocationDto locationDto) {
+    public static Location mapLocationDtoToLocation(LocationDto locationDto) {
         final Location location = new Location();
 
         location.setLat(locationDto.getLat());
@@ -11,7 +11,7 @@ public class LocationMapper {
         return location;
     }
 
-    public static LocationDto mapLocation2LocationDto(Location location) {
+    public static LocationDto mapLocationToLocationDto(Location location) {
         final LocationDto locationDto = new LocationDto();
 
         locationDto.setLat(location.getLat());

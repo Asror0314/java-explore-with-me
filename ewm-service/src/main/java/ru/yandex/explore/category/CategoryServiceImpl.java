@@ -22,19 +22,19 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto addNewCategory(NewCategoryDto categoryDto) {
-        final Category category = CategoryMapper.mapNewCategoryDto2Category(categoryDto);
+        final Category category = CategoryMapper.mapNewCategoryDtoToCategory(categoryDto);
         final Category addedCategory = catRepository.save(category);
-        return CategoryMapper.mapCategory2CategoryDto(addedCategory);
+        return CategoryMapper.mapCategoryToCategoryDto(addedCategory);
     }
 
     @Override
     @Transactional
     public CategoryDto updateCategory(UpdateCategoryDto categoryDto, Long catId) {
         getCategoryById(catId);
-        final Category category = CategoryMapper.mapUpdateCategoryDto2Category(categoryDto, catId);
+        final Category category = CategoryMapper.mapUpdateCategoryDtoToCategory(categoryDto, catId);
 
         final Category updatedCategory = catRepository.save(category);
-        return CategoryMapper.mapCategory2CategoryDto(updatedCategory);
+        return CategoryMapper.mapCategoryToCategoryDto(updatedCategory);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
         final Category category = catRepository.findById(catId).orElseThrow(
                 () -> new NotFoundException(String.format("category id = %d not found", catId)));
 
-        return CategoryMapper.mapCategory2CategoryDto(category);
+        return CategoryMapper.mapCategoryToCategoryDto(category);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
         return catRepository
                 .findAll(page)
                 .stream()
-                .map(CategoryMapper::mapCategory2CategoryDto)
+                .map(CategoryMapper::mapCategoryToCategoryDto)
                 .collect(Collectors.toList());
     }
 

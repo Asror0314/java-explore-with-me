@@ -13,8 +13,7 @@ import ru.yandex.explore.exception.EditRulesException;
 import ru.yandex.explore.exception.NotFoundException;
 import ru.yandex.explore.location.Location;
 import ru.yandex.explore.location.LocationService;
-import ru.yandex.explore.location.dto.LocationDto;
-import ru.yandex.explore.stats.StatsClient;
+import ru.yandex.explore.stats.client.StatsClient;
 import ru.yandex.explore.stats.dto.StatsDto;
 import ru.yandex.explore.user.User;
 import ru.yandex.explore.user.UserRepository;
@@ -54,11 +53,11 @@ public class EventServiceImpl implements EventService {
         final Long catId = newEventDto.getCategory();
         final Category category = findCategoryById(catId);
         final Location location = locationService.addNewLocation(newEventDto.getLocation());
-        final Event event = EventMapper.mapNewEventDto2Event(newEventDto, initiator, category, location);
+        final Event event = EventMapper.mapNewEventDtoToEvent(newEventDto, initiator, category, location);
 
         final Event addedEvent = eventRepository.save(event);
 
-        return EventMapper.mapEvent2EventFullDto(addedEvent);
+        return EventMapper.mapEventToEventFullDto(addedEvent);
     }
 
     @Override
@@ -66,7 +65,7 @@ public class EventServiceImpl implements EventService {
         userService.getUserById(initiatorId);
         final List<Event> events = eventRepository.findAllByInitiator(initiatorId, from, size);
 
-        return events.stream().map(EventMapper::mapEvent2EventShortDto).collect(Collectors.toList());
+        return events.stream().map(EventMapper::mapEventToEventShortDto).collect(Collectors.toList());
     }
 
     @Override
@@ -75,7 +74,7 @@ public class EventServiceImpl implements EventService {
         final Event event = findEventById(eventId);
         final EventState eventState = validUpdateEventUser(event, eventDto);
         event.setState(eventState);
-        validLocation(event.getLocation(), eventDto.getLocation());
+        validLocation(event.getLocation());
 
         final Category category;
         if (eventDto.getCategory() != null) {
@@ -90,7 +89,7 @@ public class EventServiceImpl implements EventService {
 
         final Event savedEvent = eventRepository.findById(eventId).orElseThrow();
 
-        return EventMapper.mapEvent2EventFullDto(savedEvent);
+        return EventMapper.mapEventToEventFullDto(savedEvent);
 
 
     }
@@ -100,7 +99,7 @@ public class EventServiceImpl implements EventService {
         findUserById(initiatorId);
         final Event event = findEventById(eventId);
 
-        return EventMapper.mapEvent2EventFullDto(event);
+        return EventMapper.mapEventToEventFullDto(event);
     }
 
     @Override
@@ -108,7 +107,7 @@ public class EventServiceImpl implements EventService {
         final Event event = findEventById(eventId);
         final Location location = event.getLocation();
         final EventState updateState = validUpdateEventAdmin(event, eventDto);
-        validLocation(location, eventDto.getLocation());
+        validLocation(location);
 
         final Category category;
         if (eventDto.getCategory() != null) {
@@ -123,7 +122,7 @@ public class EventServiceImpl implements EventService {
                             eventDto.getRequestModeration(), createdDate, updateState, eventDto.getTitle());
 
         final Event updatedEvent = eventRepository.findById(eventId).get();
-        return EventMapper.mapEvent2EventFullDto(updatedEvent);
+        return EventMapper.mapEventToEventFullDto(updatedEvent);
     }
 
     @Override
@@ -154,7 +153,7 @@ public class EventServiceImpl implements EventService {
                         startDate, endDate, from, size);
         return events
                 .stream()
-                .map(EventMapper::mapEvent2EventFullDto)
+                .map(EventMapper::mapEventToEventFullDto)
                 .collect(Collectors.toList());
     }
 
@@ -162,12 +161,12 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getPublishEventById(Long eventId) {
         final Event event = findEventById(eventId);
 
-        if (!event.getState().equals(EventState.PUBLISHED)) {
+        if (!EventState.PUBLISHED.equals(event.getState())) {
             throw new NotFoundException(String.format("Event with id = %d was not found!", eventId));
         }
         getCountHits(event);
 
-        return EventMapper.mapEvent2EventFullDto(event);
+        return EventMapper.mapEventToEventFullDto(event);
     }
 
     @Override
@@ -186,10 +185,8 @@ public class EventServiceImpl implements EventService {
         final LocalDateTime endDate = validRequestDateTime(rangeEnd);
         categories = validLongFieldIsNull(categories);
 
-        if (startDate != null && endDate != null) {
-            if (startDate.isAfter(endDate)) {
-                throw new ConstraintViolationException("The start date must be earlier than the end date");
-            }
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new ConstraintViolationException("The start date must be earlier than the end date");
         }
 
         final List<Event> events = eventRepository.findAllPublishWithSortEventDate(text, categories, paid,
@@ -198,7 +195,7 @@ public class EventServiceImpl implements EventService {
 
         return events
                 .stream()
-                .map(EventMapper::mapEvent2EventShortDto)
+                .map(EventMapper::mapEventToEventShortDto)
                 .collect(Collectors.toList());
     }
 
@@ -229,7 +226,7 @@ public class EventServiceImpl implements EventService {
         });
 
         statsDto.forEach(stats -> {
-            if (stats.getUri().equals(uriEventId)) {
+            if (uriEventId.equals(stats.getUri())) {
                 event.setViews(stats.getHits());
             }
         });
@@ -262,14 +259,14 @@ public class EventServiceImpl implements EventService {
 
         switch (eventDto.getStateAction()) {
             case REJECT_EVENT: {
-                if (event.getState().equals(EventState.PUBLISHED)) {
+                if (EventState.PUBLISHED.equals(event.getState())) {
                     throw new EditRulesException(String.format("Cannot cancel the event because it's not in " +
                             "the right state: %s", event.getState()));
                 }
                 return EventState.REJECTED;
             }
             case PUBLISH_EVENT: {
-                if (!event.getState().equals(EventState.PENDING)) {
+                if (!EventState.PENDING.equals(event.getState())) {
                     throw new EditRulesException(String.format("Cannot publish the event because it's not in " +
                             "the right state: %s", event.getState()));
                 }
@@ -285,8 +282,8 @@ public class EventServiceImpl implements EventService {
     private EventState validUpdateEventUser(Event event, UpdateEventUserDto eventDto) {
         validEventDate(2, event.getEventDate());
 
-        if (event.getState().equals(EventState.REJECTED)
-                || event.getState().equals(EventState.PENDING)) {
+        if (EventState.REJECTED.equals(event.getState())
+                || EventState.PENDING.equals(event.getState())) {
             if (eventDto.getStateAction() == null) {
                 return event.getState();
             }
@@ -308,7 +305,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private void validLocation(Location location, LocationDto locationDto) {
+    private void validLocation(Location location) {
         double newLat = location.getLat();
         double newLon = location.getLon();
         if (location.getLat() != newLat

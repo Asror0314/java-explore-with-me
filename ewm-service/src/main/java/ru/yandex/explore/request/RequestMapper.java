@@ -7,7 +7,7 @@ import ru.yandex.explore.request.dto.RequestStatus;
 import java.util.List;
 
 public class RequestMapper {
-    public static RequestDto mapRequest2RequestDto(Request request) {
+    public static RequestDto mapRequestToRequestDto(Request request) {
         final RequestDto requestDto = new RequestDto();
 
         requestDto.setId(request.getId());
@@ -19,16 +19,16 @@ public class RequestMapper {
         return requestDto;
     }
 
-    public static EventRequestStatusUpdateResultDto map2StatusUpdateResultDto(List<Request> requests) {
+    public static EventRequestStatusUpdateResultDto mapToStatusUpdateResultDto(List<Request> requests) {
         final EventRequestStatusUpdateResultDto resultDto = new EventRequestStatusUpdateResultDto();
         RequestDto requestDto;
 
         for (Request request : requests) {
             if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
-                requestDto = RequestMapper.mapRequest2RequestDto(request);
+                requestDto = RequestMapper.mapRequestToRequestDto(request);
                 resultDto.addConfirmedRequest(requestDto);
             } else {
-                requestDto = RequestMapper.mapRequest2RequestDto(request);
+                requestDto = RequestMapper.mapRequestToRequestDto(request);
                 resultDto.addRejectedRequest(requestDto);
             }
         }

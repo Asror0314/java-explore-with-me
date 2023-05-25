@@ -20,8 +20,8 @@ public class HitServiceImpl implements HitService {
 
     @Override
     public HitDto addNewHit(NewHitDto hitDto) {
-        final Hit savedHit = repository.save(HitMapper.map2Hit(hitDto));
-        return HitMapper.map2HitDto(savedHit);
+        final Hit savedHit = repository.save(HitMapper.mapToHit(hitDto));
+        return HitMapper.mapToHitDto(savedHit);
     }
 
     @Override

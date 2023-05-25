@@ -11,7 +11,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public Location addNewLocation(LocationDto locationDto) {
-        final Location location = LocationMapper.mapLocationDto2Location(locationDto);
+        final Location location = LocationMapper.mapLocationDtoToLocation(locationDto);
 
         return repository.save(location);
     }

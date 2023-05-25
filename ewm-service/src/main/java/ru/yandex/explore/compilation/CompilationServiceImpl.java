@@ -26,10 +26,10 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         final List<Event> events = eventRepository.findAllById(compDto.getEvents());
-        final Compilation compilation = CompilationMapper.mapNewCompilationDto2Compilation(compDto, events);
+        final Compilation compilation = CompilationMapper.mapNewCompilationDtoToCompilation(compDto, events);
         final Compilation addedCompilation = compRepository.save(compilation);
 
-        return CompilationMapper.mapCompilation2CompilationDto(addedCompilation);
+        return CompilationMapper.mapCompilationToCompilationDto(addedCompilation);
     }
 
     @Override
@@ -44,18 +44,18 @@ public class CompilationServiceImpl implements CompilationService {
             compDto.setTitle(compilation.getTitle());
         }
 
-        final Compilation updateComp = CompilationMapper.mapUpdateCompilationDto2Compilation(compDto, events);
+        final Compilation updateComp = CompilationMapper.mapUpdateCompilationDtoToCompilation(compDto, events);
         updateComp.setId(compId);
 
         final Compilation updatedComp = compRepository.save(updateComp);
 
-        return CompilationMapper.mapCompilation2CompilationDto(updatedComp);
+        return CompilationMapper.mapCompilationToCompilationDto(updatedComp);
     }
 
     @Override
     public CompilationDto getCompilationById(Long compId) {
         final Compilation compilation = findCompilationById(compId);
-        return CompilationMapper.mapCompilation2CompilationDto(compilation);
+        return CompilationMapper.mapCompilationToCompilationDto(compilation);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         return compilations
                 .stream()
-                .map(CompilationMapper::mapCompilation2CompilationDto)
+                .map(CompilationMapper::mapCompilationToCompilationDto)
                 .collect(Collectors.toList());
     }
 
