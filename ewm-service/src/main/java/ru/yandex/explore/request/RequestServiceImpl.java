@@ -128,12 +128,13 @@ public class RequestServiceImpl implements RequestService {
                     validStatusRequest(request);
                     confirmRequests(request, event);
                 }
+                eventRepository.save(event);
                 break;
             }
             case REJECTED: {
                 for (Request request: requests) {
                     validStatusRequest(request);
-                    rejectRequest(request);
+                    request.setStatus(RequestStatus.REJECTED);
                 }
                 break;
             }
@@ -143,7 +144,7 @@ public class RequestServiceImpl implements RequestService {
         if (!event.isLimitAvailable()) {
             final List<Request> pendingRequests = repository.findAllPendingStatus();
             for (Request request: pendingRequests) {
-                rejectRequest(request);
+                request.setStatus(RequestStatus.REJECTED);
             }
         }
 
@@ -202,22 +203,14 @@ public class RequestServiceImpl implements RequestService {
     private void confirmRequests(Request request, Event event) {
         if (event.isLimitAvailable()) {
             request.setStatus(RequestStatus.CONFIRMED);
-            repository.save(request);
 
             if (event.getParticipantLimit() <= event.getConfirmedRequests() + 1) {
                 event.setLimitAvailable(false);
             }
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-
-            eventRepository.save(event);
         } else {
-            rejectRequest(request);
+            request.setStatus(RequestStatus.REJECTED);
         }
-    }
-
-    private void rejectRequest(Request request) {
-        request.setStatus(RequestStatus.REJECTED);
-        repository.save(request);
     }
 
     private void validStatusRequest(Request request) {
