@@ -1,22 +1,32 @@
 package ru.yandex.explore.stats.hit;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.stats.dto.HitDto;
+import ru.yandex.explore.stats.dto.NewHitDto;
 import ru.yandex.explore.stats.dto.StatsDto;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @Slf4j
+@Validated
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class HitController {
 
-    @Autowired
-    private HitService service;
+    private final HitService service;
 
     @PostMapping("/hit")
-    public HitDto addNewHit(@RequestBody HitDto hitDto) {
+    @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
+    public HitDto addNewHit(@Valid @RequestBody NewHitDto hitDto) {
+        log.info("Creating new hit");
         return service.addNewHit(hitDto);
     }
 
@@ -30,6 +40,7 @@ public class HitController {
             @RequestParam(name = "unique", defaultValue = "false") boolean unique
             ) {
         log.info("Get stats with start={}, end={}, uris={}, unique={}", start, end, uris, unique);
-        return service.getStats(start, end, uris, unique);
+        List<StatsDto> stats = service.getStats(start, end, uris, unique);
+        return stats;
     }
 }

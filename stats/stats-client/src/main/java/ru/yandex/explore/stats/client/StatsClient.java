@@ -1,17 +1,18 @@
-package ru.yandex.explore.stats;
+package ru.yandex.explore.stats.client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.yandex.explore.stats.client.BaseClient;
-import ru.yandex.explore.stats.dto.HitDto;
+import ru.yandex.explore.stats.dto.NewHitDto;
 
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class StatsClient extends BaseClient {
 
     @Autowired
@@ -24,7 +25,7 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> addNewHit(HitDto hitDto) {
+    public ResponseEntity<Object> addNewHit(NewHitDto hitDto) {
         return post("/hit", hitDto);
     }
 

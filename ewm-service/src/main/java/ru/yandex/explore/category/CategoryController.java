@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.explore.category.dto.CategoryDto;
 import ru.yandex.explore.category.dto.NewCategoryDto;
+import ru.yandex.explore.category.dto.UpdateCategoryDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -25,6 +26,23 @@ public class CategoryController {
         return catService.addNewCategory(categoryDto);
     }
 
+    @PatchMapping("/admin/categories/{catId}")
+    CategoryDto updateCategory(
+            @Valid @RequestBody UpdateCategoryDto categoryDto,
+            @PathVariable(name = "catId") Long catId
+    ) {
+        log.info("Update category with catId = {}", catId);
+        return catService.updateCategory(categoryDto, catId);
+
+    }
+
+    @DeleteMapping("/admin/categories/{catId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteCategory(@PathVariable(name = "catId") Long catId) {
+        log.info("delete category with catId = {}", catId);
+        catService.deleteCategory(catId);
+    }
+
     @GetMapping("/categories/{catId}")
     CategoryDto getCategoryById(@PathVariable(name = "catId") Long catId) {
         log.info("Get category with catId = {}", catId);
@@ -40,19 +58,4 @@ public class CategoryController {
         return catService.getCategories(from, size);
     }
 
-    @PatchMapping("/admin/categories/{catId}")
-    CategoryDto updateCategory(
-            @RequestBody NewCategoryDto categoryDto,
-            @PathVariable(name = "catId") Long catId
-    ) {
-        log.info("Update category with catId = {}", catId);
-        return catService.updateCategory(categoryDto, catId);
-    }
-
-    @DeleteMapping("/admin/categories/{catId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteCategory(@PathVariable(name = "catId") Long catId) {
-        log.info("delete category with catId = {}", catId);
-        catService.deleteCategory(catId);
-    }
 }

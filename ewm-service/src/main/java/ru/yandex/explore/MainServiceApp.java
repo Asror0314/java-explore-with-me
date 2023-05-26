@@ -3,7 +3,7 @@ package ru.yandex.explore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication()
 public class MainServiceApp {
 
     public static void main(String[] args) {
