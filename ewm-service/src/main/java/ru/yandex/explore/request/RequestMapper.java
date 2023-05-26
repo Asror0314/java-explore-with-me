@@ -24,7 +24,7 @@ public class RequestMapper {
         RequestDto requestDto;
 
         for (Request request : requests) {
-            if (request.getStatus().equals(RequestStatus.CONFIRMED)) {
+            if (RequestStatus.CONFIRMED.equals(request.getStatus())) {
                 requestDto = RequestMapper.mapRequestToRequestDto(request);
                 resultDto.addConfirmedRequest(requestDto);
             } else {

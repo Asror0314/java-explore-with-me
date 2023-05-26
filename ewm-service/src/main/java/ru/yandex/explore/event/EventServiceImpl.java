@@ -164,7 +164,7 @@ public class EventServiceImpl implements EventService {
         if (!EventState.PUBLISHED.equals(event.getState())) {
             throw new NotFoundException(String.format("Event with id = %d was not found!", eventId));
         }
-        getCountHits(event);
+        setCountHits(event);
 
         return EventMapper.mapEventToEventFullDto(event);
     }
@@ -191,7 +191,7 @@ public class EventServiceImpl implements EventService {
 
         final List<Event> events = eventRepository.findAllPublishWithSortEventDate(text, categories, paid,
                                 startDate, endDate, from, size);
-        events.forEach(event -> getCountHits(event));
+        events.forEach(event -> setCountHits(event));
 
         return events
                 .stream()
@@ -215,7 +215,7 @@ public class EventServiceImpl implements EventService {
         return field;
     }
 
-    private void getCountHits(Event event) {
+    private void setCountHits(Event event) {
         final String uriEventId = String.format("/events/%d", event.getId());
         final List<String> uris = Arrays.asList(uriEventId);
         final Object statsBody = statsClient

@@ -138,7 +138,7 @@ public class RequestServiceImpl implements RequestService {
                 }
                 break;
             }
-            default: throw new RuntimeException(String.format("Unknown state: %s", requestInitiatorDto.getStatus()));
+            default: throw new NotFoundException(String.format("Unknown state: %s", requestInitiatorDto.getStatus()));
         }
 
         if (!event.isLimitAvailable()) {
