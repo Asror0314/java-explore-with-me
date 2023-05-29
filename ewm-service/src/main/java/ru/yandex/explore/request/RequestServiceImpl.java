@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.explore.event.Event;
 import ru.yandex.explore.event.EventRepository;
+import ru.yandex.explore.event.EventService;
 import ru.yandex.explore.event.dto.EventState;
 import ru.yandex.explore.exception.EditRulesException;
 import ru.yandex.explore.exception.NotFoundException;
@@ -13,7 +14,7 @@ import ru.yandex.explore.request.dto.RequestDto;
 import ru.yandex.explore.request.dto.RequestStatus;
 import ru.yandex.explore.request.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.explore.user.User;
-import ru.yandex.explore.user.UserRepository;
+import ru.yandex.explore.user.UserService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository repository;
-    private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final UserService userService;
+    private final EventService eventService;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final String dateTime = LocalDateTime.now().format(formatter);
     private final LocalDateTime createdOn = LocalDateTime.parse(dateTime, formatter);
@@ -34,8 +36,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public RequestDto addNewRequest(Long requesterId, Long eventId) {
-        final User requester = findUserById(requesterId);
-        final Event event = findEventById(eventId);
+        final User requester = userService.findUserById(requesterId);
+        final Event event = eventService.findEventById(eventId);
         validParticipationRequest(event, requester);
 
         final Request request = new Request();
@@ -62,7 +64,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public RequestDto cancelRequestRequester(Long requesterId, Long requestId) {
-        findUserById(requesterId);
+        userService.findUserById(requesterId);
         final Request request = findRequestById(requestId);
 
         if (!request.getRequester().getId().equals(requesterId)) {
@@ -88,7 +90,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getRequestRequester(Long requesterId) {
-        final User requester = findUserById(requesterId);
+        final User requester = userService.findUserById(requesterId);
         final List<Request> requests = repository.findAllByRequester(requester);
 
         return requests
@@ -99,8 +101,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public List<RequestDto> getRequestInitiator(Long initiatorId, Long eventId) {
-        final User initiator = findUserById(initiatorId);
-        findEventById(eventId);
+        final User initiator = userService.findUserById(initiatorId);
+        eventService.findEventById(eventId);
         final List<Request> requests = repository.findAllByInitiator(initiator, eventId);
 
         return requests
@@ -116,8 +118,8 @@ public class RequestServiceImpl implements RequestService {
             Long eventId,
             EventRequestStatusUpdateRequest requestInitiatorDto
     ) {
-        final User initiator = findUserById(initiatorId);
-        final Event event = findEventById(eventId);
+        final User initiator = userService.findUserById(initiatorId);
+        final Event event = eventService.findEventById(eventId);
         validUpdateStatusRequest(event, initiator);
 
         final List<Request> requests = repository.findAllById(requestInitiatorDto.getRequestIds());
@@ -157,18 +159,6 @@ public class RequestServiceImpl implements RequestService {
         return repository.findById(requestId)
                 .orElseThrow(
                         () -> new NotFoundException(String.format("Request with id = %d was not found", requestId)));
-    }
-
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("User with id = %d was not found", userId)));
-    }
-
-    private Event findEventById(Long eventId) {
-        return eventRepository.findById(eventId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("Event with id = %d was not found", eventId)));
     }
 
     private void validParticipationRequest(Event event, User requester) {

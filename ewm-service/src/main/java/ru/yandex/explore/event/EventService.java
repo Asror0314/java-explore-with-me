@@ -37,4 +37,6 @@ public interface EventService {
             String sort,
             int from,
             int size);
+
+    Event findEventById(Long eventId);
 }

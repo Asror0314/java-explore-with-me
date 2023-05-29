@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto updateCategory(UpdateCategoryDto categoryDto, Long catId) {
-        getCategoryById(catId);
+        findCategoryById(catId);
         final Category category = CategoryMapper.mapUpdateCategoryDtoToCategory(categoryDto, catId);
 
         final Category updatedCategory = catRepository.save(category);
@@ -40,14 +40,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deleteCategory(Long catId) {
-        catRepository.findById(catId);
+        findCategoryById(catId);
         catRepository.deleteById(catId);
     }
 
     @Override
     public CategoryDto getCategoryById(Long catId) {
-        final Category category = catRepository.findById(catId).orElseThrow(
-                () -> new NotFoundException(String.format("category id = %d not found", catId)));
+        final Category category = findCategoryById(catId);
 
         return CategoryMapper.mapCategoryToCategoryDto(category);
     }
@@ -62,4 +61,10 @@ public class CategoryServiceImpl implements CategoryService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Category findCategoryById(Long catId) {
+        return catRepository.findById(catId)
+                .orElseThrow(
+                        () -> new NotFoundException(String.format("Category with id = %d was not found", catId)));
+    }
 }

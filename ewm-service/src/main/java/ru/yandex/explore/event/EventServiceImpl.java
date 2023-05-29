@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.explore.category.Category;
-import ru.yandex.explore.category.CategoryRepository;
+import ru.yandex.explore.category.CategoryService;
 import ru.yandex.explore.event.dto.*;
 import ru.yandex.explore.exception.ConstraintViolationException;
 import ru.yandex.explore.exception.EditRulesException;
@@ -16,7 +16,6 @@ import ru.yandex.explore.location.LocationService;
 import ru.yandex.explore.stats.client.StatsClient;
 import ru.yandex.explore.stats.dto.StatsDto;
 import ru.yandex.explore.user.User;
-import ru.yandex.explore.user.UserRepository;
 import ru.yandex.explore.user.UserService;
 
 import java.time.LocalDateTime;
@@ -32,10 +31,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
-    private final CategoryRepository catRepository;
     private final LocationService locationService;
     private final UserService userService;
+    private final CategoryService catService;
     private final StatsClient statsClient;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final String datetime = LocalDateTime.now().format(formatter);
@@ -43,7 +41,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto addNewEvent(NewEventDto newEventDto, Long initiatorId) {
-        final User initiator = findUserById(initiatorId);
+        final User initiator = userService.findUserById(initiatorId);
         validEventDate(2, newEventDto.getEventDate());
 
         if (newEventDto.getRequestModeration() == null) {
@@ -51,7 +49,7 @@ public class EventServiceImpl implements EventService {
         }
 
         final Long catId = newEventDto.getCategory();
-        final Category category = findCategoryById(catId);
+        final Category category = catService.findCategoryById(catId);
         final Location location = locationService.addNewLocation(newEventDto.getLocation());
         final Event event = EventMapper.mapNewEventDtoToEvent(newEventDto, initiator, category, location);
 
@@ -62,7 +60,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventsUser(Long initiatorId, int from, int size) {
-        userService.getUserById(initiatorId);
+        userService.findUserById(initiatorId);
         final List<Event> events = eventRepository.findAllByInitiator(initiatorId, from, size);
 
         return events.stream().map(EventMapper::mapEventToEventShortDto).collect(Collectors.toList());
@@ -70,7 +68,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventUser(UpdateEventUserDto eventDto, Long initiatorId, Long eventId) {
-        findUserById(initiatorId);
+        userService.findUserById(initiatorId);
         final Event event = findEventById(eventId);
         final EventState eventState = validUpdateEventUser(event, eventDto);
         event.setState(eventState);
@@ -78,7 +76,7 @@ public class EventServiceImpl implements EventService {
 
         final Category category;
         if (eventDto.getCategory() != null) {
-            category = findCategoryById(eventDto.getCategory());
+            category = catService.findCategoryById(eventDto.getCategory());
         } else {
             category = event.getCategory();
         }
@@ -87,16 +85,14 @@ public class EventServiceImpl implements EventService {
                 eventDto.getEventDate(), event.getLocation(), eventDto.getPaid(), eventDto.getParticipantLimit(), eventDto.getRequestModeration(),
                 eventState, eventDto.getTitle());
 
-        final Event savedEvent = eventRepository.findById(eventId).orElseThrow();
+        final Event savedEvent = findEventById(eventId);
 
         return EventMapper.mapEventToEventFullDto(savedEvent);
-
-
     }
 
     @Override
     public EventFullDto getEventUserById(Long initiatorId, Long eventId) {
-        findUserById(initiatorId);
+        userService.findUserById(initiatorId);
         final Event event = findEventById(eventId);
 
         return EventMapper.mapEventToEventFullDto(event);
@@ -111,7 +107,7 @@ public class EventServiceImpl implements EventService {
 
         final Category category;
         if (eventDto.getCategory() != null) {
-            category = findCategoryById(eventDto.getCategory());
+            category = catService.findCategoryById(eventDto.getCategory());
         } else {
             category = event.getCategory();
         }
@@ -121,7 +117,7 @@ public class EventServiceImpl implements EventService {
                             eventDto.getEventDate(), location, eventDto.getPaid(), eventDto.getParticipantLimit(),
                             eventDto.getRequestModeration(), createdDate, updateState, eventDto.getTitle());
 
-        final Event updatedEvent = eventRepository.findById(eventId).get();
+        final Event updatedEvent = findEventById(eventId);
         return EventMapper.mapEventToEventFullDto(updatedEvent);
     }
 
@@ -232,22 +228,11 @@ public class EventServiceImpl implements EventService {
         });
     }
 
-    private Event findEventById(Long eventId) {
+    @Override
+    public Event findEventById(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(
                         () -> new NotFoundException(String.format("Event with id = %d was not found", eventId)));
-    }
-
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("User with id = %d was not found", userId)));
-    }
-
-    private Category findCategoryById(Long catId) {
-        return catRepository.findById(catId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("Category with id = %d was not found", catId)));
     }
 
     private EventState validUpdateEventAdmin(Event event, UpdateEventAdminDto eventDto) {
