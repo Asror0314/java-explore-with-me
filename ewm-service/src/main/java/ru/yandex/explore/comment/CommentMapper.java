@@ -15,9 +15,9 @@ public class CommentMapper {
     }
 
     public static CommentDto mapToCommentDto(Comment comment) {
-        final CommentDto commentBuilder = new CommentDto();
+        final CommentDto commentDto = new CommentDto();
 
-        commentBuilder
+        CommentDto commentBuilder = commentDto
                 .setId(comment.getId())
                 .setText(comment.getText())
                 .setCreatedOn(comment.getCreatedOn())
