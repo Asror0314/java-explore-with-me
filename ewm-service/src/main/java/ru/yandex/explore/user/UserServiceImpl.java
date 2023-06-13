@@ -44,9 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long userId) {
-        final User user = repository.findById(userId)
-                .orElseThrow(
-                        () -> new NotFoundException(String.format("User with id = %d was not found", userId)));
+        final User user = findUserById(userId);
 
         return UserMapper.mapUser2UserDto(user);
     }
@@ -57,4 +55,10 @@ public class UserServiceImpl implements UserService {
         repository.deleteById(userId);
     }
 
+    @Override
+    public User findUserById(Long userId) {
+        return repository.findById(userId)
+                .orElseThrow(
+                        () -> new NotFoundException(String.format("User with id = %d was not found", userId)));
+    }
 }
